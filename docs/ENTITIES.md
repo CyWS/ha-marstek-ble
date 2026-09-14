@@ -2,9 +2,13 @@
 
 Entity availability is product-specific. The integration selects a product runtime from the discovered/persisted device type and only exposes entities supported by that product profile.
 
-## Venus E
+## Validation status
 
-Venus E retains the integration's original monitoring and control surfaces.
+Jupiter-C Plus has been exercised against real hardware on the current multi-product code path.
+
+Venus E has **not** been revalidated on physical hardware after the multi-product refactor. Its compatibility is currently supported by automated regression/unit tests that compare the migrated runtime and entity behavior with the intended behavior of the original integration. The Venus entities and controls described below are therefore implemented and expected to work, but remain hardware-unverified in this fork.
+
+## Venus E
 
 ### Monitoring
 
@@ -18,15 +22,16 @@ Typical Venus entities include:
 
 ### Controls
 
-Venus remains the only product with enabled write/control platforms. Depending on device/firmware, these include:
+Venus remains the only product with enabled write/control platforms. The current implementation exposes:
 
-- output and EPS-related switches;
-- AC-input, generator, buzzer, and adaptive-mode controls;
-- self-consumption/manual-mode buttons;
-- power-limit buttons; and
-- charge-mode / CT-polling-rate selects.
+- `Output 1 Control`, `EPS Mode`, `AC Input`, `Generator`, and `Buzzer` switches;
+- an `Operating Mode` select with **Self-Consumption** and **Manual** options;
+- `Charge Mode` and `CT Polling Rate` selects; and
+- `Reboot`, fixed power-mode, AC-power, and total-power buttons.
 
-Write controls use Venus command semantics and must not be assumed to apply to other Marstek products.
+The current code does **not** expose AI Optimization as a BLE control.
+
+Write controls use Venus command semantics and must not be assumed to apply to other Marstek products. Because no physical Venus unit was available during this release preparation, the control behavior is covered by automated tests but has not been confirmed end-to-end against current hardware/firmware.
 
 ## Jupiter-C Plus
 
@@ -66,14 +71,14 @@ Fast and medium polling intervals are configurable, but the actual commands are 
 
 For Jupiter-C Plus the current read-only schedule is:
 
-| Tier | Commands |
-| ---- | -------- |
-| Fast | `0x03`, `0x14` |
+| Tier   | Commands                         |
+| ------ | -------------------------------- |
+| Fast   | `0x03`, `0x14`                   |
 | Medium | `0x0D`, `0x08`, `0x04`, `0x13` |
 
 Jupiter commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` are intentionally not polled because their semantics are absent or unresolved.
 
-Venus uses its own runtime-owned polling schedule and retains the telemetry/configuration commands required by its existing entity set.
+Venus uses its own runtime-owned polling schedule and retains the telemetry/configuration commands required by its existing entity set. That schedule is regression-tested but has not been revalidated on physical Venus hardware in this fork.
 
 ## Entity identity and availability
 
