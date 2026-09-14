@@ -4,8 +4,8 @@ This repository currently targets `0.5.0-rc1` as the first multi-product release
 
 The release candidate includes:
 
-- Venus E monitoring and existing write/control functionality;
-- Jupiter-C Plus read-only monitoring;
+- the migrated Venus E monitoring and existing write/control implementation, covered by regression/unit tests but not revalidated on physical Venus hardware after the multi-product refactor;
+- Jupiter-C Plus read-only monitoring, exercised against real hardware;
 - Jupiter base/expansion battery child devices;
 - product-specific polling and parsing; and
 - explicit Jupiter supported-command restrictions that exclude unresolved commands from polling.
@@ -37,7 +37,7 @@ Run the unresolved-defect inventory separately:
 just test-known-issues
 ```
 
-`known_issue` failures are tracked defects rather than part of the passing baseline. Review each remaining failure before release and block the RC only if it affects the supported release behavior or indicates a regression in the candidate.
+Tests marked `known_issue` are tracked defects rather than part of the passing baseline. An empty known-issue inventory is valid; the `just` recipe treats pytest's no-tests-selected result as success. At the time of this release preparation there are no tests carrying the marker.
 
 ## 2. Physical-device release gate
 
@@ -58,27 +58,30 @@ The `Surplus Feed-In Active Unverified` entity is diagnostic only and must not b
 
 ### Venus E
 
-Before the RC, perform at least a smoke test on an existing Venus installation:
+No physical Venus device is available for the current release preparation. The first RC therefore relies on automated compatibility/regression tests for the migrated Venus runtime and clearly documents that Venus has not been hardware-revalidated after the multi-product refactor.
+
+Lack of local Venus hardware does not by itself block `0.5.0-rc1` if the complete automated release gate passes. During the RC period, Venus reports should receive priority. If physical Venus hardware becomes available, verify at minimum:
 
 - discovery/config-entry loading;
 - core battery telemetry;
 - sensor/binary-sensor availability;
-- existing button/switch/select controls;
+- the existing button/switch/select controls;
 - integration reload; and
 - Home Assistant restart.
 
-The multi-product changes are intended to preserve Venus behavior, so any Venus regression blocks the RC.
+Any confirmed Venus regression blocks promotion of the affected code to the stable release until it is understood and fixed.
 
 ## 3. Release preparation
 
 Before merging the candidate to the default branch:
 
-1. Confirm the local and physical-device gates above.
+1. Confirm the local release gate and available physical-device checks above.
 2. Confirm `README.md`, `hacs.json`, and `manifest.json` refer to this repository where appropriate.
-3. Confirm the manifest still contains a valid semantic version. The release workflow will replace it with the requested release version.
-4. Confirm Jupiter remains documented as read-only.
-5. Confirm unresolved Jupiter commands remain absent from its poll schedule.
-6. Review the final diff against `main` for private diagnostic material or identifiers.
+3. Confirm the README clearly distinguishes hardware-tested Jupiter support from unit-test-only Venus compatibility.
+4. Confirm the manifest still contains a valid semantic version. The release workflow will replace it with the requested release version.
+5. Confirm Jupiter remains documented as read-only.
+6. Confirm unresolved Jupiter commands remain absent from its poll schedule.
+7. Review the final diff against `main` for private diagnostic material or identifiers.
 
 ## 4. Merge and version
 
@@ -90,12 +93,14 @@ The existing manual release workflow operates on the repository default branch. 
 0.5.0-rc1
 ```
 
-The workflow updates `custom_components/marstek_ble/manifest.json`, creates commit `chore: release v0.5.0-rc1`, tags `v0.5.0-rc1`, pushes the default branch/tag, and creates a draft GitHub release.
+The workflow updates `custom_components/marstek_ble/manifest.json`, creates commit `chore: release v0.5.0-rc1`, tags `v0.5.0-rc1`, pushes the default branch/tag, and creates a draft GitHub pre-release.
 
 Do not run that workflow until the validated candidate has been merged to `main`.
 
 ## 5. RC validation and stable release
 
-Install `0.5.0-rc1` through the same mechanism users will use (preferably HACS) and repeat the Jupiter and Venus smoke tests.
+Install `0.5.0-rc1` through the same mechanism users will use, preferably HACS, and repeat the Jupiter smoke tests. Collect Venus feedback and perform a Venus hardware smoke test if suitable hardware becomes available.
+
+A real Venus validation before the stable release is strongly preferred. If no Venus hardware becomes available, the stable release must continue to state clearly that Venus compatibility after the multi-product refactor is supported by automated regression tests rather than physical-device validation.
 
 If no release-blocking regressions appear during the RC period, prepare `0.5.0` from the same code line plus explicitly reviewed RC fixes. Re-run the complete release gate before tagging the stable version.
