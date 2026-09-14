@@ -7,10 +7,13 @@
     },
     {
       "local_name": "MST_VNSE3_*"
+    },
+    {
+      "local_name": "MST_JPLS_*"
     }
   ],
   "codeowners": [
-    "@jaapp"
+    "@The-M1k3y"
   ],
   "config_flow": true,
   "dependencies": [
@@ -18,10 +21,10 @@
     "integration",
     "utility_meter"
   ],
-  "documentation": "https://github.com/jaapp/ha-marstek-ble",
+  "documentation": "https://github.com/The-M1k3y/ha-marstek-ble",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/jaapp/ha-marstek-ble/issues",
+  "issue_tracker": "https://github.com/The-M1k3y/ha-marstek-ble/issues",
   "requirements": [],
   "version": "0.4.0-rc3"
 }

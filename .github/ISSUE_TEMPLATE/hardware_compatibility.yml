@@ -1,0 +1,96 @@
+name: Hardware compatibility / diagnostics
+description: Share real-device diagnostics, especially for Venus devices or Jupiter systems with expansion batteries.
+title: "[Hardware] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Real-device reports are useful even when the integration appears to work correctly.
+        We are especially interested in Venus E hardware and Jupiter-C Plus systems with expansion batteries because those configurations have not yet been fully validated against the current multi-product implementation.
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: Marstek product
+      options:
+        - Venus E hardware v2 (MST_ACCP_*)
+        - Venus E hardware v3 (MST_VNSE3_*)
+        - Jupiter-C Plus
+        - Other Marstek product
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Exact model / hardware revision
+      description: Include any model label, hardware revision, or BLE prefix you can identify.
+      placeholder: "Example: Venus E v2 / MST_ACCP_*"
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware versions
+      description: Include EMS, inverter, MPPT, BMS, or other firmware versions if available.
+      placeholder: "Unknown is fine."
+
+  - type: input
+    id: home_assistant_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.8.2"
+    validations:
+      required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version or commit
+      placeholder: "0.5.0-rc1 or abc1234"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Bluetooth connection
+      options:
+        - Direct Home Assistant Bluetooth adapter
+        - ESPHome Bluetooth Proxy
+        - Other / unknown
+    validations:
+      required: true
+
+  - type: input
+    id: expansions
+    attributes:
+      label: Jupiter expansion batteries
+      description: For Jupiter-C Plus, enter the number of installed expansion batteries and, if known, their model/capacity.
+      placeholder: "Example: 2 expansions"
+
+  - type: textarea
+    id: observed_behavior
+    attributes:
+      label: Observed behavior
+      description: |
+        Tell us whether discovery, setup, entities, telemetry, child devices, reloads, and controls (Venus only) appear to work.
+        Mention anything that looks missing, duplicated, implausible, or different from the Marstek app.
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Home Assistant diagnostics
+      description: |
+        Download diagnostics for the Marstek BLE config entry and drag the file into this field.
+        Diagnostics from working systems are useful because they can reveal packet-layout differences between firmware and hardware configurations.
+        The diagnostics contain raw BLE payload history for troubleshooting; review the file before posting it publicly if that is a concern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional observations
+      description: Add screenshots, Marstek-app comparisons, expansion topology details, or other useful context.

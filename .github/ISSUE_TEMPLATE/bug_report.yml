@@ -1,0 +1,123 @@
+name: Bug report
+description: Report a reproducible problem with the Marstek BLE integration.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please use this form for problems with already supported devices or integration behavior.
+        If you only want to provide hardware diagnostics/compatibility data, use the hardware compatibility form instead.
+
+  - type: checkboxes
+    id: existing_issue
+    attributes:
+      label: Existing issue check
+      description: Please check whether the problem has already been reported.
+      options:
+        - label: I searched the existing issues and did not find a matching report.
+          required: true
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: Marstek product
+      options:
+        - Jupiter-C Plus
+        - Venus E hardware v2 (MST_ACCP_*)
+        - Venus E hardware v3 (MST_VNSE3_*)
+        - Other / unknown
+    validations:
+      required: true
+
+  - type: input
+    id: home_assistant_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.8.2"
+    validations:
+      required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version or commit
+      description: Use the installed release version or commit SHA if you are testing a development build.
+      placeholder: "0.5.0-rc1 or abc1234"
+    validations:
+      required: true
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Device firmware / hardware revision
+      description: Provide any firmware, hardware, EMS, inverter, MPPT, or BMS version information you know.
+      placeholder: "Unknown is fine."
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Bluetooth connection
+      options:
+        - Direct Home Assistant Bluetooth adapter
+        - ESPHome Bluetooth Proxy
+        - Other / unknown
+    validations:
+      required: true
+
+  - type: input
+    id: expansions
+    attributes:
+      label: Jupiter expansion batteries
+      description: For Jupiter-C Plus, enter the number of installed expansion batteries. Leave blank for Venus or unknown devices.
+      placeholder: "0, 1, 2, or 3"
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and any relevant device state when it occurred.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect the integration or device to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide the shortest sequence that reliably reproduces the issue, if known.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Home Assistant diagnostics
+      description: |
+        Download diagnostics for the Marstek BLE config entry from Home Assistant and drag the file into this field.
+        If diagnostics cannot be provided, explain why. Diagnostics are particularly important for protocol/parsing problems.
+        The diagnostics contain raw BLE payload history for troubleshooting; review the file before posting it publicly if that is a concern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Add relevant Marstek BLE / Home Assistant log excerpts. Avoid posting unrelated full logs.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add screenshots, observations, links, or anything else that may help.

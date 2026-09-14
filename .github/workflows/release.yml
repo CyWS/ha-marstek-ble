@@ -73,3 +73,4 @@ jobs:
           tag_name: "v${{ steps.prep.outputs.version }}"
           generate_release_notes: true
           draft: true
+          prerelease: ${{ contains(steps.prep.outputs.version, '-') }}

@@ -1,190 +1,184 @@
 # Marstek BLE Integration for Home Assistant
 
-> **⚠️ BETA/EXPERIMENTAL RELEASE**
-> This integration is currently in beta and should be considered experimental. While it is functional, you may encounter bugs or unexpected behavior. Please report any issues you find.
+Home Assistant integration for Marstek energy-storage systems over Bluetooth Low Energy (BLE).
 
-Home Assistant integration for Marstek Venus E energy storage systems via Bluetooth Low Energy (BLE).
+> [!IMPORTANT]
+> **AI-assisted development**
+>
+> Significant parts of the multi-product work in this fork were developed with assistance from large language models. AI tools were used to analyze the existing codebase and sanitized diagnostics, help reverse-engineer protocol behavior, propose and write implementation changes, create tests, review failures, and draft documentation. The human maintainer defined the goals, supplied hardware observations, reviewed the changes, and ran the local and real-device tests that were available.
+>
+> AI-generated analysis and code are not independent verification. Protocol interpretations may be wrong, and passing automated tests do not prove compatibility with hardware that has not been tested. Assistant-authored commits are identified in their commit messages where applicable.
+
+## Origin and project scope
+
+This project is a fork and continuation of [jaapp/ha-marstek-ble](https://github.com/jaapp/ha-marstek-ble). jaapp's work provided the original Home Assistant integration, BLE transport and discovery, Venus E telemetry and controls, configurable polling, HACS packaging, and ESPHome Bluetooth Proxy support. That work was essential to this project and remains the foundation on which this fork is built.
+
+This fork extends and restructures the original integration with:
+
+- a product-specific runtime, parser, schema, polling, and entity architecture intended to support multiple Marstek product families without reusing unverified protocol semantics between them;
+- read-only Jupiter-C Plus support based on reverse engineering and real-device testing;
+- explicit per-product command allowlists and safer Jupiter polling that avoids unresolved command meanings;
+- a model for Jupiter base/expansion battery child devices;
+- substantially expanded isolated regression, malformed-input, lifecycle, topology, and failure-path tests, plus a separate Home Assistant test harness; and
+- structured protocol and architecture documentation under [`docs/OKF/`](docs/OKF/).
+
+The Venus implementation was migrated onto the new multi-product runtime and is covered by automated compatibility/regression tests. No physical Venus device has been available to verify the refactored code path, so Venus support should currently be treated as **expected compatible rather than hardware-verified**.
+
+## Supported devices
+
+| Product | BLE prefix | Validation status | Monitoring | Controls |
+| ------- | ---------- | ----------------- | ---------- | -------- |
+| Marstek Venus E hardware v2 | `MST_ACCP_*` | Expected compatible; regression/unit tested after the refactor, not hardware-retested | Yes | Yes, expected compatible |
+| Marstek Venus E hardware v3 | `MST_VNSE3_*` | Expected compatible; regression/unit tested, not hardware-validated in this fork | Yes | Yes, expected compatible |
+| Marstek Jupiter-C Plus | `MST_JPLS_*` | Base unit tested on real hardware | Yes | No, read-only |
+
+### Jupiter expansion batteries
+
+The integration contains a model for the Jupiter-C Plus base battery and up to three expansion-battery positions. These are represented as Home Assistant child devices using the physical pack position as the stable identifier.
+
+**Expansion-battery behavior has not been tested against hardware with actual expansion packs installed.** The current implementation is based on the observed packet structure and synthetic/regression tests. Pack detection, field interpretation, child-device behavior, or additional expansion-specific data may therefore be incomplete or wrong.
+
+If you use a Jupiter-C Plus with one or more expansion batteries, please see [Diagnostics and hardware reports](#diagnostics-and-hardware-reports). Diagnostics from these installations are especially valuable even when the integration appears to work correctly.
 
 ## Features
 
-- **Multi-device support**: Add multiple Marstek batteries, each as a separate device
-- **Real-time monitoring**: Battery voltage, current, SOC, SOH, temperature, cell voltages
-- **Power control**: Output control, EPS mode, power limits, adaptive mode
-- **Energy tracking**: Integration with Home Assistant Energy Dashboard
-- **BLE Proxy support**: Extend range using ESPHome BLE proxies. One proxy can connect multiple batteries.
-- **Configurable polling**: Adjust fast and medium intervals to balance responsiveness and BLE traffic
-- **Local operation**: No cloud connectivity required
+- Multiple Marstek systems can be added as independent Home Assistant devices.
+- Local BLE operation without a Marstek cloud dependency.
+- ESPHome Bluetooth Proxy support.
+- Configurable fast and medium polling intervals.
+- Product-specific packet parsing and polling schedules.
+- Battery, inverter/grid, PV, energy, temperature, firmware, and diagnostic telemetry where supported by the selected product.
+- Experimental Jupiter-C Plus base/expansion battery child-device support.
+- The original Venus monitoring and control surfaces retained by the implementation and covered by automated compatibility tests.
 
 ## Installation
 
-### Via HACS (Recommended)
+### HACS
 
-1. Click this button:
+1. Open **HACS → Integrations → Custom repositories**.
+2. Add `https://github.com/The-M1k3y/ha-marstek-ble` as an **Integration** repository.
+3. Install **Marstek BLE**.
+4. Restart Home Assistant.
 
-[![Open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=jaapp&repository=ha-marstek-ble&category=integration)
+You can also open the repository directly in HACS:
 
-Or:
+[![Open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=The-M1k3y&repository=ha-marstek-ble&category=integration)
 
-1. Open **HACS → Integrations → Custom repositories**
-2. Add `https://github.com/jaapp/ha-marstek-ble` as an *Integration*
-3. Install **Marstek BLE** and restart Home Assistant
+### Manual installation
 
-### Manual Installation
-
-1. Copy `custom_components/marstek_ble` to your Home Assistant `custom_components` directory
-2. Restart Home Assistant
+1. Copy `custom_components/marstek_ble` into the Home Assistant `custom_components` directory.
+2. Restart Home Assistant.
 
 ## Setup
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **Add Integration**
-3. Search for "Marstek BLE"
-4. Select your battery from the discovered devices
-5. Click **Submit**
-6. (Optional) Open the integration options to tune the fast/medium polling intervals
+1. Go to **Settings → Devices & services**.
+2. Select **Add Integration**.
+3. Search for **Marstek BLE**.
+4. Select the discovered device.
+5. Complete the configuration flow.
+6. Optionally adjust the fast and medium polling intervals in the integration options.
 
-Repeat for each battery you want to add.
+Repeat this process for each Marstek device you want to add.
+
+## Product behavior
+
+### Venus E
+
+The implementation is intended to preserve the original integration's Venus monitoring and write/control behavior. Automated compatibility and regression tests cover the migrated Venus runtime, parsing, entity generation, polling schedule, and legacy control platforms, but the refactored implementation has not yet been validated on physical Venus hardware.
+
+Implemented Venus controls currently include:
+
+- `Output 1 Control`, `EPS Mode`, `AC Input`, `Generator`, and `Buzzer` switches;
+- an `Operating Mode` select for **Self-Consumption** and **Manual**;
+- `Charge Mode` and `CT Polling Rate` selects; and
+- reboot plus fixed power-mode/power-limit buttons.
+
+The current code does **not** expose AI Optimization as a BLE control. Venus behavior that depends on device or firmware details should therefore be considered expected compatibility until confirmed on real hardware.
+
+### Jupiter-C Plus
+
+Jupiter support is intentionally **read-only**. The base unit has been exercised against real hardware. The integration exposes modeled telemetry including:
+
+- battery state of charge, voltage, current, power, stored energy, temperatures, limits, and diagnostic state;
+- AC/grid output power, grid qualification, grid voltage/frequency, inverter state/errors, and temperatures;
+- four PV input channels with connection/activity state and available voltage/current/power telemetry;
+- PV-generation and discharge-energy counters;
+- MPPT state and diagnostics;
+- modeled base/expansion battery child devices; and
+- diagnostic event-history records and other explicitly marked tentative/unverified observations.
+
+No Jupiter `button`, `switch`, or `select` entities are created. Commands whose Jupiter semantics are unresolved are not polled.
+
+Some Jupiter diagnostic entities intentionally include words such as **Unverified**. These represent useful reverse-engineering observations, not vendor-confirmed semantics. In particular, `Surplus Feed-In Active Unverified` must not be interpreted as a confirmed representation of the user-facing surplus-feed-in setting.
 
 ## Polling
 
-- **Fast (default 1s)**: Runtime info and BMS data; configurable in Options → Fast polling interval (clamped to 1–60s)
-- **Medium (default 60s)**: System data, WiFi SSID, config, CT polling rate, meter IP, network info, device identity, timer info, logs; configurable in Options → Medium polling interval (clamped to 5–300s and not faster than the fast interval)
+The integration has two configurable polling tiers:
 
-Medium polling is scheduled on multiples of the fast interval, so the cadence is rounded to the nearest fast tick.
+- **Fast**: default 1 second, configurable from 1–60 seconds.
+- **Medium**: default 60 seconds, configurable from 5–300 seconds and never faster than the fast interval.
 
-Entity IDs use your device slug—replace `<device>` with your device name (e.g., `sensor.backup_battery_battery_voltage`). Values below are sample values only—private identifiers (IP, MAC, serials) are intentionally omitted. Defaults in parentheses reflect the initial configuration; both tiers can be customized in the integration options.
+Actual commands are product-specific. For Jupiter-C Plus the current read-only schedule is:
 
-| Entity ID (example) | Example value | Polling tier (s) |
-| --- | --- | --- |
-| `sensor.<device>_battery_voltage` | 50.37 V | fast (1) |
-| `sensor.<device>_battery_current` | -0.2 A | fast (1) |
-| `sensor.<device>_battery_soc` | 15.0 % | fast (1) |
-| `sensor.<device>_battery_soh` | 99.0 % | fast (1) |
-| `sensor.<device>_battery_temperature` | 1.0 °C | fast (1) |
-| `sensor.<device>_battery_power` | -10.07 W | fast (1) |
-| `sensor.<device>_battery_power_in` | 0 W | fast (1) |
-| `sensor.<device>_battery_power_out` | 10.07 W | fast (1) |
-| `sensor.<device>_output_1_power` | 0.0 W | fast (1) |
-| `sensor.<device>_design_capacity` | 5120.0 Wh | fast (1) |
-| `sensor.<device>_remaining_capacity` | 768.0 Wh | fast (1) |
-| `sensor.<device>_available_capacity` | 4352.0 Wh | fast (1) |
-| `sensor.<device>_temperature_low` | 0.0 °C | fast (1) |
-| `sensor.<device>_temperature_high` | 0.0 °C | fast (1) |
-| `sensor.<device>_cell_1_voltage` | 3.148 V | fast (1) |
-| `sensor.<device>_cell_2_voltage` | 3.153 V | fast (1) |
-| `sensor.<device>_cell_3_voltage` | 3.146 V | fast (1) |
-| `sensor.<device>_cell_4_voltage` | 3.151 V | fast (1) |
-| `sensor.<device>_cell_5_voltage` | 3.148 V | fast (1) |
-| `sensor.<device>_cell_6_voltage` | 3.145 V | fast (1) |
-| `sensor.<device>_cell_7_voltage` | 3.148 V | fast (1) |
-| `sensor.<device>_cell_8_voltage` | 3.153 V | fast (1) |
-| `sensor.<device>_cell_9_voltage` | 3.144 V | fast (1) |
-| `sensor.<device>_cell_10_voltage` | 3.150 V | fast (1) |
-| `sensor.<device>_cell_11_voltage` | 3.148 V | fast (1) |
-| `sensor.<device>_cell_12_voltage` | 3.154 V | fast (1) |
-| `sensor.<device>_cell_13_voltage` | 3.143 V | fast (1) |
-| `sensor.<device>_cell_14_voltage` | 3.147 V | fast (1) |
-| `sensor.<device>_cell_15_voltage` | 3.151 V | fast (1) |
-| `sensor.<device>_cell_16_voltage` | 3.146 V | fast (1) |
-| `sensor.<device>_battery_state` | discharging | fast (1) |
-| `sensor.<device>_system_status` | 1 | medium (~60) |
-| `sensor.<device>_config_mode` | 100 | medium (~60) |
-| `sensor.<device>_ct_polling_rate` | 119 | medium (~60) |
-| `sensor.<device>_wifi_ssid` | ExampleWiFi | medium (~60) |
-| `sensor.<device>_device_type` | HMG-50 | medium (~60) |
-| `sensor.<device>_firmware_version` | 202409090159 | medium (~60) |
-| `sensor.<device>_grid_power` | 0.0 W | medium (~60) |
-| `sensor.<device>_solar_power` | 0.0 W | medium (~60) |
-| `sensor.<device>_daily_energy_charged` | 0.32 kWh | medium (~60) |
-| `sensor.<device>_daily_energy_discharged` | 0.48 kWh | medium (~60) |
-| `sensor.<device>_monthly_energy_charged` | 39.87 kWh | medium (~60) |
-| `sensor.<device>_monthly_energy_discharged` | 31.70 kWh | medium (~60) |
-| `sensor.<device>_total_energy_charged` | 51.51 kWh | medium (~60) |
-| `sensor.<device>_total_energy_discharged` | 41.07 kWh | medium (~60) |
-| `sensor.<device>_mosfet_temperature` | 13.0 °C | medium (~60) |
-| `sensor.<device>_temperature_sensor_1` | 13.0 °C | medium (~60) |
-| `sensor.<device>_temperature_sensor_2` | 13.0 °C | medium (~60) |
-| `sensor.<device>_temperature_sensor_3` | 13.0 °C | medium (~60) |
-| `sensor.<device>_temperature_sensor_4` | 13.0 °C | medium (~60) |
-| `sensor.<device>_work_mode` | 1 | medium (~60) |
-| `sensor.<device>_product_code` | 154 | medium (~60) |
-| `sensor.<device>_power_rating` | 800 W | medium (~60) |
-| `sensor.<device>_bms_version` | 215 | medium (~60) |
-| `sensor.<device>_voltage_limit` | 57.1 V | medium (~60) |
-| `sensor.<device>_charge_current_limit` | 50.0 A | medium (~60) |
-| `sensor.<device>_discharge_current_limit` | 90.0 A | medium (~60) |
-| `sensor.<device>_error_code` | 0 | medium (~60) |
-| `sensor.<device>_warning_code` | 851968 | medium (~60) |
-| `sensor.<device>_runtime` | 33.78 h | medium (~60) |
+- fast: `0x03`, `0x14`;
+- medium: `0x0D`, `0x08`, `0x04`, `0x13`.
 
-### Energy dashboard sensors
+Jupiter commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` are not polled because their semantics are absent or unresolved.
 
-Add the cumulative totals to Home Assistant's Energy Dashboard using your device slug:
-- `sensor.<device>_total_energy_charged` → Battery energy in
-- `sensor.<device>_total_energy_discharged` → Battery energy out
+Venus keeps its own product-specific polling schedule. Automated tests verify the intended behavior of the refactored schedule, but it has not yet been revalidated against Venus hardware in this fork.
 
-These increment-only sensors (e.g., `51.51 kWh` in, `41.07 kWh` out) are the recommended sources for long-term battery accounting.
+## BLE proxy setup
 
-## Mode controls
+To extend Bluetooth range, configure an [ESPHome Bluetooth Proxy](https://esphome.io/components/bluetooth_proxy/). One proxy can serve multiple Marstek devices.
 
-- **Self-Consumption (Auto)**: command `0x0E`; exposed as “Self-Consumption Mode On/Off” buttons. Mirrors the app’s “Self Consumption” mode.
-- **Manual (Work Mode)**: command `0x09`; exposed as “Manual Mode On/Off” buttons. Mirrors the app’s “Manual” mode for manual scheduling.
-- **AI Optimization / Trade**: command `0x11`; exposed as an experimental button (“Enable AI Optimization”) and reflected in the Adaptive Mode switch state.
+## Diagnostics and hardware reports
 
-## Supported Devices
+Real-device diagnostics are important because Marstek protocol details can vary by product, hardware revision, firmware, and installed battery configuration. Reports are useful even when no obvious bug is present.
 
-- Marstek Venus E hardware v2 (`MST_ACCP_*` - tested)
-- Marstek Venus E hardware v3 (`MST_VNSE3_*` - untested)
+We are particularly interested in diagnostics from:
 
-## BLE Proxy Setup
+- **Venus E v2 and v3 devices**, to verify that the refactored multi-product implementation behaves like the original integration on real hardware;
+- **Jupiter-C Plus systems with expansion batteries**, because expansion handling has not yet been hardware-tested and the packets may contain additional information or behavior that is not represented by the current model; and
+- **other Marstek products**. If a device is not currently supported, open an issue with its model, BLE advertising name/prefix, and a Home Assistant diagnostics download. We are willing to investigate additional products where the BLE protocol is accessible.
 
-To extend Bluetooth range, set up an [ESPHome BLE Proxy](https://esphome.io/components/bluetooth_proxy/). One proxy can connect to multiple batteries.
+When reporting a problem or providing a compatibility report, please include:
 
-### Recommended Hardware
+- Home Assistant version;
+- integration version or commit;
+- Marstek model and, where known, hardware/firmware revision;
+- whether a direct Bluetooth adapter or ESPHome Bluetooth Proxy is used;
+- for Jupiter, the number of installed expansion batteries; and
+- the Home Assistant diagnostics download for the Marstek BLE config entry.
 
-Any ESP32 device will work as a Bluetooth proxy. Popular options include:
+The diagnostics exporter redacts known parsed identifiers such as MAC addresses, serial numbers, device IDs, Wi-Fi names, and network addresses. It currently also includes recent raw BLE frame/payload hex for protocol troubleshooting; those raw payloads can encode values that are not independently redacted. Review a diagnostics file before posting it publicly if that is a concern.
 
-- **ESP-WROOM-32** - Affordable general-purpose ESP32 module
-- **M5Stack Atom Lite** - Compact device with built-in RGB LED for status indication
-- **ESP32-DevKitC** - Development board with USB programming
-- **Any ESP32-based device** with Bluetooth support
+## Development and testing
 
-### Setup Steps
+The repository contains an isolated test suite that does not require a real Home Assistant instance, network access, Bluetooth hardware, an ESPHome proxy, or a physical Marstek device.
 
-1. Flash an ESP32 device with ESPHome
-2. Add the bluetooth_proxy component
-3. Add to Home Assistant
-4. Home Assistant will automatically route Marstek BLE traffic through the proxy when needed
+Typical local checks are:
 
-## Development & Testing
+```bash
+just install-quality
+just check
+just coverage
+tox
+```
 
-### Local Testing
+A separate genuine Home Assistant test harness is available for config-flow and integration-lifecycle testing while still mocking Bluetooth/device hardware.
 
-1. Copy `custom_components/marstek_ble/` to your HA `config/custom_components/`
-2. Restart Home Assistant
-3. Enable debug logging in `configuration.yaml`:
-   ```yaml
-   logger:
-     default: info
-     logs:
-       custom_components.marstek_ble: debug
-   ```
-4. Check logs: Settings → System → Logs
+Tests marked `known_issue` are used as an unresolved-defect inventory. The inventory is currently empty; `just test-known-issues` treats an empty selection as success.
 
-### Testing Multiple Batteries
-
-The integration supports multiple batteries. To test:
-1. Ensure each battery has a unique BLE name (e.g., `MST_ACCP_5251`, `MST_ACCP_d7c4`)
-2. Add each battery separately via the UI
-3. Each will appear as a separate integration entry
-4. Each battery gets its own set of entities
+See [`tests/README.md`](tests/README.md), [`docs/RELEASE.md`](docs/RELEASE.md), and the `justfile` for the available test and release commands.
 
 ## Attribution
 
-Based on reverse engineering work from:
-- [marstek-venus-monitor](https://github.com/rweijnen/marstek-venus-monitor) by @rweijnen
-- [esphome-b2500](https://github.com/tomquist/esphome-b2500) by @tomquist
-- [hm2500pub](https://github.com/noone2k/hm2500pub) by @noone2k
+This project builds directly on prior open-source work:
+
+- [jaapp/ha-marstek-ble](https://github.com/jaapp/ha-marstek-ble) by @jaapp — the original Home Assistant integration from which this fork was developed;
+- [marstek-venus-monitor](https://github.com/rweijnen/marstek-venus-monitor) by @rweijnen;
+- [esphome-b2500](https://github.com/tomquist/esphome-b2500) by @tomquist; and
+- [hm2500pub](https://github.com/noone2k/hm2500pub) by @noone2k.
 
 ## License
 
@@ -192,4 +186,4 @@ MIT
 
 ## Disclaimer
 
-This is experimental software created through reverse engineering. Not affiliated with Marstek Energy. Use at your own risk.
+This is unofficial software developed through reverse engineering and is not affiliated with Marstek Energy. Use it at your own risk.

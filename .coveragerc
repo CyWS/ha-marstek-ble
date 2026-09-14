@@ -1,0 +1,13 @@
+[run]
+branch = True
+source =
+    custom_components/marstek_ble
+    standalone_test
+
+[report]
+show_missing = True
+skip_covered = False
+precision = 1
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:

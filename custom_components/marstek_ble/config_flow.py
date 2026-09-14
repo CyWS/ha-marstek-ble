@@ -17,6 +17,7 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_MEDIUM_POLL_INTERVAL,
     CONF_POLL_INTERVAL,
+    CONF_PRODUCT_ID,
     DEFAULT_MEDIUM_POLL_INTERVAL,
     DEFAULT_POLL_INTERVAL,
     DEVICE_PREFIXES,
@@ -26,8 +27,15 @@ from .const import (
     MIN_MEDIUM_POLL_INTERVAL,
     MIN_POLL_INTERVAL,
 )
+from .products import VENUS_RUNTIME, runtime_for_name
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _product_id_for_name(name: str | None) -> str:
+    """Resolve an enabled product ID, preserving legacy Venus fallback behavior."""
+    runtime = runtime_for_name(name)
+    return runtime.product_id if runtime is not None else VENUS_RUNTIME.product_id
 
 
 class MarstekBLEConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -96,6 +104,7 @@ class MarstekBLEConfigFlow(ConfigFlow, domain=DOMAIN):
                 data={
                     CONF_ADDRESS: self._discovery_info.address,
                     CONF_NAME: self._discovery_info.name or self._discovery_info.address,
+                    CONF_PRODUCT_ID: _product_id_for_name(self._discovery_info.name),
                 },
             )
 
@@ -115,7 +124,15 @@ class MarstekBLEConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the user step to pick discovered device."""
         if user_input is not None:
             address = user_input[CONF_ADDRESS]
-            discovery_info = self._discovered_devices[address]
+            discovery_info = self._discovered_devices.get(address)
+            if discovery_info is None:
+                _LOGGER.warning("Selected unknown Marstek BLE address: %s", address)
+                if not self._discovered_devices:
+                    return self.async_abort(reason="no_devices_found")
+                return self.async_show_form(
+                    step_id="user",
+                    data_schema=self._get_user_schema(),
+                )
 
             await self.async_set_unique_id(address, raise_on_progress=False)
             self._abort_if_unique_id_configured()
@@ -125,6 +142,7 @@ class MarstekBLEConfigFlow(ConfigFlow, domain=DOMAIN):
                 data={
                     CONF_ADDRESS: address,
                     CONF_NAME: discovery_info.name or address,
+                    CONF_PRODUCT_ID: _product_id_for_name(discovery_info.name),
                 },
             )
 
