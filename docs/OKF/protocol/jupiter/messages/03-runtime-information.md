@@ -4,14 +4,14 @@ title: Jupiter-C Plus 0x03 runtime summary
 description: Sanitized runtime response fields for PV inputs, grid validity, battery state, energy counters, inverter errors, operational status, and firmware versions.
 tags: [jupiter, ble, telemetry, runtime]
 status: draft
-source_revision: "306dce61854f5626dfb4a8454fe686791c39b2d9"
-generated: { by: openai/gpt-5.6-sol, at: 2026-08-10T18:09:00Z }
+source_revision: "03cd0abb9d3a3ac6421037a2f439a6aa9927cdb8"
+generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T16:30:00Z }
 sources:
   - id: sanitized-map
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/306dce61854f5626dfb4a8454fe686791c39b2d9/docs/sources/jupiter-c-plus-ble-field-map.md
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/03cd0abb9d3a3ac6421037a2f439a6aa9927cdb8/docs/sources/jupiter-c-plus-ble-field-map.md
     title: Sanitized Jupiter field map
   - id: model
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/8614c49855e2b471cf57113d6297b8321ced9e6f/custom_components/marstek_ble/products/jupiter.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/8bd07088c023f3dc263982170cd573df77ebaee0/custom_components/marstek_ble/products/jupiter.py
     title: Declarative Jupiter model
 ---
 
@@ -41,8 +41,8 @@ Payload length: 74 bytes. Offsets are relative to the payload.
 | `0x1F` |      4 | `u32 LE`      | Total PV generation       | raw ÷ 100 kWh                           | Confirmed  |
 | `0x23` |      2 | `u16 LE`      | Inverter error code       | raw                                     | Confirmed  |
 | `0x25` |      2 | unknown       | unknown                   | —                                       | —          |
-| `0x27` |      4 | `u32 LE`      | Daily discharge energy    | raw ÷ 100 kWh                           | Confirmed  |
-| `0x2B` |      4 | `u32 LE`      | Monthly discharge energy  | raw ÷ 100 kWh                           | Confirmed  |
+| `0x27` |      4 | `u32 LE`      | Daily output energy       | raw ÷ 100 kWh                           | Strong     |
+| `0x2B` |      4 | `u32 LE`      | Monthly output energy     | raw ÷ 100 kWh                           | Strong     |
 | `0x2F` |      2 | `u16 LE`      | EMS firmware version      | raw                                     | Confirmed  |
 | `0x31` |      2 | `u16 LE`      | Inverter firmware version | raw                                     | Confirmed  |
 | `0x33` |      2 | `u16 LE`      | MPPT firmware version     | raw                                     | Confirmed  |
@@ -50,6 +50,15 @@ Payload length: 74 bytes. Offsets are relative to the payload.
 | `0x37` |      5 | unknown       | unknown                   | —                                       | —          |
 | `0x3C` |      1 | `u8 bitfield` | Operational status        | raw                                     | Tentative  |
 | `0x3D` |     13 | unknown       | unknown                   | —                                       | —          |
+
+# Output-energy counters
+
+The counters at `0x27` and `0x2B` track energy delivered through the device
+output path. They are not battery-discharge counters: AC output can be supplied
+directly by PV, by the battery, or by a combination of both. Their field layout
+and scaling are stable, but the semantic label remains Strong rather than
+vendor-confirmed. Battery-side charge/discharge energy should be derived from
+signed battery-side power when needed.
 
 # Operational status at `0x3C`
 
@@ -84,6 +93,7 @@ The battery-state mapping is supported by controlled observations of idle,
 charging, and forced discharge. Unrecognized raw values are exposed as
 `unknown` rather than treated as charging.
 
-The stored-energy, state-of-charge, generation, discharge, firmware, and inverter
-error fields share canonical destinations with more precise or duplicate fields
-in `0x14`. The latest successfully parsed packet updates the cumulative value.
+The stored-energy, state-of-charge, generation, output-energy, firmware, and
+inverter-error fields share canonical destinations with more precise or duplicate
+fields in `0x14`. The latest successfully parsed packet updates the cumulative
+value.
