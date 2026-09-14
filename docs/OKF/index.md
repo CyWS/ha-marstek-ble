@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # Marstek BLE knowledge
 
-This bundle describes the runtime-enabled Venus and Jupiter product models, live declarative read-only entity infrastructure, and the repository's isolated testing and coverage policy at source revision `112abd322722b2e84bcdf34ee4b0325bf14b7313`. Read the scope first, then open only the concepts relevant to the task.
+This bundle describes the runtime-enabled Venus and Jupiter product models, live declarative read-only entity infrastructure, and the repository's isolated testing and coverage policy at source revision `44aee70ecc78d854dd8170fbe0f19b24455d15d1`. Read the scope first, then open only the concepts relevant to the task.
 
 # Scope
 
