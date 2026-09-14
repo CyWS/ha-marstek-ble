@@ -15,7 +15,21 @@ from custom_components.marstek_ble.marstek_device import MarstekData
 
 
 def test_load_manifest_version() -> None:
-    assert diagnostics._load_manifest_version() == "0.4.0-rc3"
+    class Manifest:
+        def joinpath(self, name):
+            assert name == "manifest.json"
+            return self
+
+        def read_text(self, encoding):
+            assert encoding == "utf-8"
+            return '{"version": "test-version"}'
+
+    original_files = diagnostics.resources.files
+    diagnostics.resources.files = lambda package: Manifest()
+    try:
+        assert diagnostics._load_manifest_version() == "test-version"
+    finally:
+        diagnostics.resources.files = original_files
 
 
 def test_load_manifest_version_handles_missing_and_invalid_json(monkeypatch) -> None:
@@ -111,7 +125,14 @@ def test_coordinator_diagnostics_contains_poll_and_device_state() -> None:
 
 
 @pytest.mark.asyncio
-async def test_diagnostics_uses_runtime_or_hass_fallback_and_redacts_known_fields() -> None:
+async def test_diagnostics_uses_runtime_or_hass_fallback_and_redacts_known_fields(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        diagnostics,
+        "_load_manifest_version",
+        lambda: "test-version",
+    )
     hass = HomeAssistant()
     coordinator = fake_coordinator()
     config_entry = entry(coordinator)
@@ -122,7 +143,7 @@ async def test_diagnostics_uses_runtime_or_hass_fallback_and_redacts_known_field
     assert data["network_info"] == "**REDACTED**"
     assert data["mac_address"] == "**REDACTED**"
     assert data["device_id"] == "**REDACTED**"
-    assert result["environment"]["integration_version"] == "0.4.0-rc3"
+    assert result["environment"]["integration_version"] == "test-version"
     config_entry.runtime_data = None
     hass.data[DOMAIN] = {config_entry.entry_id: {"coordinator": coordinator}}
     fallback = await diagnostics.async_get_config_entry_diagnostics(hass, config_entry)
