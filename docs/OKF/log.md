@@ -7,6 +7,11 @@
 - **Polling safety**: Confirmed Jupiter remains read-only and limited to the explicit supported-command set plus the model-identification exception. Commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` remain unpolled.
 - **Operational status caution**: Retained the bit-1 diagnostic observation at runtime offset `0x3C` but explicitly documented that it is not a confirmed representation of the user-facing surplus-feed-in setting.
 - **Release documentation**: Updated repository metadata, HACS installation instructions, supported-device documentation, and isolated-test documentation for the first multi-product release candidate.
+- **Hardware-validation boundary**: Clarified that Jupiter-C Plus has real-device validation on the current multi-product path, while Venus compatibility after the refactor is currently supported by regression/unit tests rather than physical Venus hardware validation.
+- **Venus controls**: Corrected release-facing documentation to match the current implementation: Self-Consumption/Manual are options of the `Operating Mode` select, and AI Optimization is not exposed as a BLE control.
+- **Protocol documentation audit**: Corrected the Jupiter protocol index to remove `0x21`, `0x22`, and `0x24` from the live polling schedule, documented the distinction between retained unresolved schemas and commands that are actually sent, and updated the Venus framing reference for current declared-length validation and product-runtime dispatch.
+- **Testing documentation audit**: Removed stale references to Jupiter as not runtime-enabled and documented that the current `known_issue` inventory is empty while preserving the marker policy for future defects.
+- **AI disclosure**: Added a prominent README disclosure describing how LLM assistance was used for code analysis, reverse-engineering support, implementation, tests, failure review, and documentation, while distinguishing AI assistance from human review and hardware validation.
 
 ## 2026-08-13
 
