@@ -127,7 +127,7 @@ class JupiterInverterData:
     # Error-code names inferred from controlled grid-loss behavior remain tentative.
     error_code: int | None = source_field(sources={_RUNTIME: FieldSource(0x23, "<H"), _DETAIL: FieldSource(0x02, "<H")}, entities=_sensor("inverter_error_code", "Inverter Error Code", entity_category=_DIAGNOSTIC))
     warning_code: int | None = source_field(sources={_DETAIL: FieldSource(0x04, "<H")}, entities=_sensor("inverter_warning_code", "Inverter Warning Code", entity_category=_DIAGNOSTIC))
-    grid_voltage: float | None = source_field(sources={_DETAIL: FieldSource(0x06, "<H", divide_by(10))}, entities=_sensor("grid_voltage", "Grid Voltage", native_unit_of_measurement=UnitOfElectricPotential.VOLT, device_class=SensorDeviceClass.VOLTAGE, state_class=SensorStateClass.MEASUREMENT))
+    grid_voltage: float | None = source_field(sources={_DETAIL: FieldSource(0x06, "<H", divide_by(10))}, entities=_sensor("grid_voltage", "Grid Voltage", native_unit_of_measurement=UnitOfElectricPotential.VOLT, device_class=SensorDeviceClass.VOLTAGE, state_class=SensorStateClass.MEASUREMENT, entity_category=_DIAGNOSTIC))
     grid_current: float | None = source_field(sources={_DETAIL: FieldSource(0x08, "<H", divide_by(10))})
     grid_power_factor: int | None = source_field(sources={_DETAIL: FieldSource(0x0A, "<H")}, entities=_sensor("grid_power_factor", "Grid Power Factor", entity_category=_DIAGNOSTIC))
     grid_frequency: float | None = source_field(sources={_DETAIL: FieldSource(0x0C, "<H", divide_by(100))}, entities=_sensor("grid_frequency", "Grid Frequency", native_unit_of_measurement=UnitOfFrequency.HERTZ, device_class=SensorDeviceClass.FREQUENCY, state_class=SensorStateClass.MEASUREMENT, suggested_display_precision=2))
