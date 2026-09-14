@@ -4,23 +4,23 @@ title: Marstek BLE knowledge scope
 description: Defines the product, source, privacy, runtime-status, and trust boundaries for this knowledge bundle.
 tags: [scope, provenance, privacy, marstek, venus, jupiter]
 status: draft
-source_revision: "aaab90ae2bde49671ee9081fb0df499ff1134134"
-generated: { by: openai/gpt-5.6-sol, at: 2026-08-13T10:29:54Z }
+source_revision: "44aee70ecc78d854dd8170fbe0f19b24455d15d1"
+generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T12:15:00Z }
 sources:
   - id: repository
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/112abd322722b2e84bcdf34ee4b0325bf14b7313
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/44aee70ecc78d854dd8170fbe0f19b24455d15d1
     title: ha-marstek-ble repository at the documented revision
   - id: runtime
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/product_runtime.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/product_runtime.py
     title: Generic product runtime layer
   - id: entity-runtime
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/product_entity_platform.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/product_entity_platform.py
     title: Runtime declarative entity synchronization
   - id: products
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/products
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/products
     title: Runtime-enabled Venus and Jupiter product definitions
   - id: jupiter-map
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/2cd631c99cf445d0526f450e1f7d5e55f5958178/docs/sources/jupiter-c-plus-ble-field-map.md
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/docs/sources/jupiter-c-plus-ble-field-map.md
     title: Sanitized Jupiter-C Plus BLE field map
 ---
 
@@ -42,7 +42,9 @@ Venus and Jupiter-C Plus are runtime-enabled products. Discovery and persisted p
 
 Jupiter support is currently **read-only**. It polls `0x03` and `0x14` on the fast cadence and `0x0D`, `0x08`, `0x04`, and `0x13` on the medium cadence. Commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` are not polled because their Jupiter semantics are absent or unresolved. Each product profile explicitly declares its supported commands; the model-identification command `0x04` is the only polling exception because it must remain available independently of the selected product command set.
 
-Sensor and binary-sensor platforms now consume `ProductProfile` entity plans. Jupiter therefore exposes its modeled aggregate telemetry, four PV inputs, derived values, and populated battery-pack records. Battery-pack child devices use stable positional identifiers. New pack slots are added when a later `pack_count` increase is observed; a later decrease keeps the already-created entity identity but marks it unavailable through the repeated-record presence binding.[^entity-runtime]
+Sensor and binary-sensor platforms consume `ProductProfile` entity plans. Jupiter exposes modeled aggregate telemetry, four PV inputs, derived values, compact diagnostic event-history records, and populated battery-pack records. Battery-pack child devices use stable positional identifiers. New pack slots are added when a later `pack_count` increase is observed; a later decrease keeps the already-created entity identity but marks it unavailable through the repeated-record presence binding.[^entity-runtime]
+
+Several Jupiter state bits and diagnostic fields remain explicitly tentative or unverified. In particular, the `0x03` offset `0x3C` bit-1 binary entity is retained as an observation and must not be treated as a confirmed representation of the user-facing surplus-feed-in configuration.
 
 Venus write/control platforms (`button`, `switch`, and `select`) are not loaded for Jupiter because their command semantics have not been validated for that product.
 
