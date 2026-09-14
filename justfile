@@ -31,9 +31,9 @@ compile:
 test:
     {{python}} -m pytest -m "not known_issue"
 
-# Run only the documented production-defect tests.
+# Run only the documented production-defect tests; an empty inventory succeeds.
 test-known-issues:
-    {{python}} -m pytest -m "known_issue"
+    @if {{python}} -m pytest -m "known_issue"; then exit 0; else status=$?; if [ "$status" -eq 5 ]; then echo "No known-issue tests."; exit 0; fi; exit "$status"; fi
 
 # Run the complete isolated suite with coverage, including known defects.
 test-full:
