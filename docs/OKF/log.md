@@ -2,6 +2,7 @@
 
 ## 2026-09-14
 
+- **Jupiter output-energy semantics**: Renamed the Jupiter counters previously exposed as daily/monthly/local discharge energy to `Daily Output Energy`, `Monthly Output Energy`, and `Local Total Output Energy`. Observed behavior indicates these counters track energy delivered through the device output path regardless of whether PV or battery supplied it. Battery-side cumulative charge/discharge energy remains intentionally delegated to Home Assistant using the directional battery-power sensors.
 - **Jupiter directional battery power**: Added `Battery Power In` and `Battery Power Out` as non-negative derived sensors from the existing signed battery voltage/current power calculation. Positive signed power is charging; negative signed power is discharging. The directional sensors add no new protocol interpretation and are intended for Home Assistant Energy Dashboard or Integral-helper use.
 - **Release preparation**: Reconciled the physically tested Jupiter diagnostic branch with the supported-command branch without reintroducing unresolved Jupiter polling commands.
 - **Jupiter diagnostics**: Restored the tested diagnostic-only MPPT/PV state observations, tentative base/PE voltages, diagnostic classifications, and compact event-history entities while retaining the newer grid-validity, inverter-error, and 16-bit event-code interpretations.
