@@ -262,5 +262,7 @@ JUPITER_PROFILE = ProductProfile(
     discovery_prefixes=("MST_JPLS_",),
     derived_entities=(
         derived_sensor(description=SensorEntityDescription(key="battery_power", name="Battery Power", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT), value_fn=_battery_power, stale_paths=(("battery", "voltage"), ("battery", "current"))),
+        derived_sensor(description=SensorEntityDescription(key="battery_power_in", name="Battery Power In", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT), value_fn=lambda data: max(0, value) if (value := _battery_power(data)) is not None else None, stale_paths=(("battery", "voltage"), ("battery", "current"))),
+        derived_sensor(description=SensorEntityDescription(key="battery_power_out", name="Battery Power Out", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT), value_fn=lambda data: max(0, -value) if (value := _battery_power(data)) is not None else None, stale_paths=(("battery", "voltage"), ("battery", "current"))),
     ),
 )
