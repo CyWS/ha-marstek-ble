@@ -5,7 +5,7 @@ description: Defines the product, source, privacy, runtime-status, and trust bou
 tags: [scope, provenance, privacy, marstek, venus, jupiter]
 status: draft
 source_revision: "44aee70ecc78d854dd8170fbe0f19b24455d15d1"
-generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T12:15:00Z }
+generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T12:45:00Z }
 sources:
   - id: repository
     resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/44aee70ecc78d854dd8170fbe0f19b24455d15d1
@@ -39,6 +39,8 @@ Included subjects are:
 # Runtime-status boundary
 
 Venus and Jupiter-C Plus are runtime-enabled products. Discovery and persisted product selection resolve to separate product runtimes, and each runtime owns its own parsing and poll schedule.[^runtime][^products]
+
+`Runtime-enabled` is an implementation status. It must not be interpreted as proof that every product, firmware version, field interpretation, or control has been validated on physical hardware. Release-facing documentation tracks that validation status separately from this code-path status.
 
 Jupiter support is currently **read-only**. It polls `0x03` and `0x14` on the fast cadence and `0x0D`, `0x08`, `0x04`, and `0x13` on the medium cadence. Commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` are not polled because their Jupiter semantics are absent or unresolved. Each product profile explicitly declares its supported commands; the model-identification command `0x04` is the only polling exception because it must remain available independently of the selected product command set.
 
