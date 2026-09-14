@@ -4,6 +4,8 @@ The default test suite covers the runtime integration under `custom_components/m
 
 The default environment supplies lightweight stubs for Home Assistant, BLE, and ESPHome API libraries. It requires no Home Assistant installation or instance, Bluetooth adapter, ESPHome proxy, network access, or Marstek device. All packet replay data is generated and contains no captured identifiers or telemetry.
 
+These tests can provide strong regression coverage, but they are not a substitute for physical-device validation. In particular, the migrated Venus path is covered by automated compatibility tests but has not been revalidated on real Venus hardware for the current multi-product release candidate.
+
 ## Default suite
 
 Install and run:
@@ -24,6 +26,8 @@ The default suite includes:
 - manifest, HACS, platform, translation-string, import-boundary, and packaging contracts.
 
 Tests marked `known_issue` are ordinary failing tests, not skips or expected failures. The known-issue run therefore acts as an unresolved-defect inventory. The filtered baseline must pass and confirms that no unrelated regression was introduced.
+
+At the time of the first multi-product release preparation, no tests carry the `known_issue` marker. An empty selection is valid; `just test-known-issues` treats pytest exit code 5 (`no tests collected/selected`) as success while preserving real test failures.
 
 The `justfile` provides the preferred wrappers:
 
