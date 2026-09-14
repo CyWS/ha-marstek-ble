@@ -2,6 +2,7 @@
 
 ## 2026-09-14
 
+- **Jupiter directional battery power**: Added `Battery Power In` and `Battery Power Out` as non-negative derived sensors from the existing signed battery voltage/current power calculation. Positive signed power is charging; negative signed power is discharging. The directional sensors add no new protocol interpretation and are intended for Home Assistant Energy Dashboard or Integral-helper use.
 - **Release preparation**: Reconciled the physically tested Jupiter diagnostic branch with the supported-command branch without reintroducing unresolved Jupiter polling commands.
 - **Jupiter diagnostics**: Restored the tested diagnostic-only MPPT/PV state observations, tentative base/PE voltages, diagnostic classifications, and compact event-history entities while retaining the newer grid-validity, inverter-error, and 16-bit event-code interpretations.
 - **Polling safety**: Confirmed Jupiter remains read-only and limited to the explicit supported-command set plus the model-identification exception. Commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` remain unpolled.
