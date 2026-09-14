@@ -17,6 +17,10 @@ little-endian unless stated otherwise.
 
 ## Packet inventory
 
+This inventory records response structures observed during reverse engineering;
+it is **not** the current runtime polling schedule. In particular, the live
+Jupiter runtime does not send `0x1A`, `0x1C`, `0x21`, `0x22`, or `0x24`.
+
 | Command | Payload length | Status                         |
 | ------- | -------------: | ------------------------------ |
 | `0x03`  |             74 | Runtime summary                |
