@@ -1,0 +1,60 @@
+name: Feature request
+description: Suggest an improvement to supported-device behavior, Home Assistant integration, diagnostics, or project tooling.
+title: "[Feature] "
+body:
+  - type: checkboxes
+    id: existing_issue
+    attributes:
+      label: Existing request check
+      options:
+        - label: I searched the existing issues and did not find the same request.
+          required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - General / all products
+        - Jupiter-C Plus
+        - Venus E
+        - Home Assistant entities / UX
+        - Diagnostics / reverse engineering
+        - Development / testing / documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Describe the limitation or workflow that motivates the request.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe what you would like the integration or project to do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: protocol_evidence
+    attributes:
+      label: Device/protocol evidence
+      description: If this depends on device behavior or a BLE command/field, provide the observations or diagnostics that support it.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any workarounds or alternative designs you have considered.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add screenshots, examples, links, or other context.
