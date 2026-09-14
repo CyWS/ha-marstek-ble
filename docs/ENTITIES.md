@@ -41,14 +41,18 @@ Jupiter support is read-only in the first multi-product release. No Jupiter `but
 
 The Jupiter main device exposes modeled telemetry such as:
 
-- battery state of charge, stored energy, voltage, current, signed battery power, state, limits, state of health, and temperatures;
+- battery state of charge, stored energy, voltage, current, signed battery power, directional `Battery Power In`/`Battery Power Out`, state, limits, state of health, and temperatures;
 - AC output power and qualified grid-connection state;
 - grid voltage/frequency and inverter diagnostics;
 - four PV inputs with connection state plus available voltage/current/power telemetry;
-- PV generation and discharge-energy counters;
+- PV-generation and output-energy counters;
 - MPPT state/diagnostics and PV-input-active flags;
 - firmware/identity diagnostics; and
 - compact event-history diagnostic records.
+
+`Battery Power` is signed: positive values represent charging and negative values represent discharging. `Battery Power In` clamps charging power to a non-negative value and reports zero while discharging; `Battery Power Out` reports the absolute discharge power and zero while charging. These directional sensors are derived from the same battery voltage/current telemetry and can be used as the two power inputs for Home Assistant Energy Dashboard battery configuration or as inputs to Integral helpers when cumulative charge/discharge energy sensors are needed.
+
+The Jupiter `Daily Output Energy`, `Monthly Output Energy`, and `Local Total Output Energy` counters represent energy delivered through the device output path. They must not be interpreted as battery-discharge counters: output can be supplied directly by PV, by the battery, or by a combination of both. Battery-side cumulative charge/discharge energy should therefore be derived from the directional battery-power sensors if needed.
 
 Some reverse-engineered fields are explicitly tentative or carry `Unverified` in their friendly name. Those entities are diagnostic observations, not vendor-confirmed semantics.
 

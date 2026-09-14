@@ -109,14 +109,32 @@ class JupiterRuntimeData:
 
 @dataclass(slots=True)
 class JupiterEnergyData:
-    """PV-generation and discharge-energy counters."""
+    """PV-generation and output-energy counters."""
 
     daily_pv_generation: float | None = source_field(sources={_RUNTIME: FieldSource(0x17, "<I", divide_by(100)), _DETAIL: FieldSource(0x40, "<I", divide_by(100))}, entities=_sensor("daily_pv_generation", "Daily PV Generation", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING, entity_category=_DIAGNOSTIC))
     monthly_pv_generation: float | None = source_field(sources={_RUNTIME: FieldSource(0x1B, "<I", divide_by(100)), _DETAIL: FieldSource(0x48, "<I", divide_by(100))}, entities=_sensor("monthly_pv_generation", "Monthly PV Generation", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING, entity_category=_DIAGNOSTIC))
     total_pv_generation: float | None = source_field(sources={_RUNTIME: FieldSource(0x1F, "<I", divide_by(100)), _DETAIL: FieldSource(0x4C, "<I", divide_by(100))}, entities=_sensor("total_pv_generation", "Total PV Generation", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING))
-    daily_discharge_energy: float | None = source_field(sources={_RUNTIME: FieldSource(0x27, "<I", divide_by(100)), _DETAIL: FieldSource(0x14, "<I", divide_by(100))}, entities=_sensor("daily_discharge_energy", "Daily Discharge Energy", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING))
-    monthly_discharge_energy: float | None = source_field(sources={_RUNTIME: FieldSource(0x2B, "<I", divide_by(100)), _DETAIL: FieldSource(0x1C, "<I", divide_by(100))}, entities=_sensor("monthly_discharge_energy", "Monthly Discharge Energy", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING))
-    local_total_discharge_energy: float | None = source_field(sources={_DETAIL: FieldSource(0x18, "<I", divide_by(100))}, entities=_sensor("local_total_discharge_energy", "Local Total Discharge Energy", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING, entity_category=_DIAGNOSTIC))
+    daily_output_energy: float | None = source_field(sources={_RUNTIME: FieldSource(0x27, "<I", divide_by(100)), _DETAIL: FieldSource(0x14, "<I", divide_by(100))}, entities=_sensor("daily_output_energy", "Daily Output Energy", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING))
+    monthly_output_energy: float | None = source_field(sources={_RUNTIME: FieldSource(0x2B, "<I", divide_by(100)), _DETAIL: FieldSource(0x1C, "<I", divide_by(100))}, entities=_sensor("monthly_output_energy", "Monthly Output Energy", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING))
+    local_total_output_energy: float | None = source_field(sources={_DETAIL: FieldSource(0x18, "<I", divide_by(100))}, entities=_sensor("local_total_output_energy", "Local Total Output Energy", native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR, device_class=SensorDeviceClass.ENERGY, state_class=SensorStateClass.TOTAL_INCREASING, entity_category=_DIAGNOSTIC))
+
+    @property
+    def daily_discharge_energy(self) -> float | None:
+        """Return the former discharge-energy field for compatibility."""
+
+        return self.daily_output_energy
+
+    @property
+    def monthly_discharge_energy(self) -> float | None:
+        """Return the former discharge-energy field for compatibility."""
+
+        return self.monthly_output_energy
+
+    @property
+    def local_total_discharge_energy(self) -> float | None:
+        """Return the former discharge-energy field for compatibility."""
+
+        return self.local_total_output_energy
 
 
 @dataclass(slots=True)
@@ -262,5 +280,7 @@ JUPITER_PROFILE = ProductProfile(
     discovery_prefixes=("MST_JPLS_",),
     derived_entities=(
         derived_sensor(description=SensorEntityDescription(key="battery_power", name="Battery Power", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT), value_fn=_battery_power, stale_paths=(("battery", "voltage"), ("battery", "current"))),
+        derived_sensor(description=SensorEntityDescription(key="battery_power_in", name="Battery Power In", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT), value_fn=lambda data: max(0, value) if (value := _battery_power(data)) is not None else None, stale_paths=(("battery", "voltage"), ("battery", "current"))),
+        derived_sensor(description=SensorEntityDescription(key="battery_power_out", name="Battery Power Out", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT), value_fn=lambda data: max(0, -value) if (value := _battery_power(data)) is not None else None, stale_paths=(("battery", "voltage"), ("battery", "current"))),
     ),
 )

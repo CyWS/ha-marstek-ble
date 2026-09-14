@@ -59,8 +59,8 @@ Jupiter runtime does not send `0x1A`, `0x1C`, `0x21`, `0x22`, or `0x24`.
 | `0x1F` |      4 | `u32 LE`      | Total PV generation       | 0.01 kWh                             | Confirmed  |
 | `0x23` |      2 | `u16 LE`      | Inverter error code       | raw                                  | Confirmed  |
 | `0x25` |      2 | unknown       | unknown                   | —                                    | —          |
-| `0x27` |      4 | `u32 LE`      | Daily discharge energy    | 0.01 kWh                             | Confirmed  |
-| `0x2B` |      4 | `u32 LE`      | Monthly discharge energy  | 0.01 kWh                             | Confirmed  |
+| `0x27` |      4 | `u32 LE`      | Daily output energy       | 0.01 kWh                             | Strong     |
+| `0x2B` |      4 | `u32 LE`      | Monthly output energy     | 0.01 kWh                             | Strong     |
 | `0x2F` |      2 | `u16 LE`      | EMS firmware version      | raw version                          | Confirmed  |
 | `0x31` |      2 | `u16 LE`      | Inverter firmware version | raw version                          | Confirmed  |
 | `0x33` |      2 | `u16 LE`      | MPPT firmware version     | raw version                          | Confirmed  |
@@ -72,6 +72,13 @@ Jupiter runtime does not send `0x1A`, `0x1C`, `0x21`, `0x22`, or `0x24`.
 Controlled observations distinguish raw battery-state values `0`, `1`, and `2`
 as idle, charging, and discharging respectively. Other raw values remain
 unresolved.
+
+The output-energy counters track energy delivered through the device output path.
+They are not battery-discharge counters: output can be supplied directly by PV,
+by the battery, or by both. The semantic label is therefore kept at Strong
+confidence even though the field locations and scaling are stable. Battery-side
+charge/discharge energy should be derived from signed battery-side power if
+needed.
 
 The operational-status field at `0x3C` has so far been observed with values
 `0x00`, `0x01`, and `0x03`, which is consistent with a bitfield interpretation.
@@ -158,9 +165,9 @@ for tentative correlations explicitly documented above.
 | `0x0E` |      2 | `u16 LE`       | Internal DC/bus voltage                  | 0.1 V        | Strong     |
 | `0x10` |      2 | `i16 LE`       | AC/grid output power                     | W            | Confirmed  |
 | `0x12` |      2 | `i16 LE`       | Inverter temperature                     | °C           | Strong     |
-| `0x14` |      4 | `u32 LE`       | Daily discharge energy                   | 0.01 kWh     | Confirmed  |
-| `0x18` |      4 | `u32 LE`       | Local cumulative discharge counter       | 0.01 kWh     | Strong     |
-| `0x1C` |      4 | `u32 LE`       | Monthly discharge energy                 | 0.01 kWh     | Confirmed  |
+| `0x14` |      4 | `u32 LE`       | Daily output energy                      | 0.01 kWh     | Strong     |
+| `0x18` |      4 | `u32 LE`       | Local cumulative output energy           | 0.01 kWh     | Strong     |
+| `0x1C` |      4 | `u32 LE`       | Monthly output energy                    | 0.01 kWh     | Strong     |
 | `0x20` |      2 | `u16 bitfield` | MPPT controller/input-active flags       | raw          | Confirmed* |
 | `0x22` |      2 | `u16 LE`       | MPPT error code                          | raw          | Strong     |
 | `0x24` |      2 | `i16 LE`       | MPPT temperature                         | °C           | Strong     |
@@ -227,16 +234,16 @@ connection has not yet become valid. The individual flag bits remain unresolved.
 The integration preserves the complete 16-bit state word. Individual bit meanings
 are only assigned where repeated observations support them.
 
-| Bit | Mask     | Working interpretation             | Confidence |
-| --: | -------- | ---------------------------------- | ---------- |
-|   0 | `0x0001` | MPPT stopped / parked / disabled   | Tentative  |
-|   1 | `0x0002` | unresolved                         | —          |
-|   2 | `0x0004` | MPPT controller initialized / ready| Strong     |
-|   3 | `0x0008` | unresolved                         | —          |
-|   4 | `0x0010` | PV input 1 active                  | Confirmed  |
-|   5 | `0x0020` | PV input 2 active                  | Confirmed  |
-|   6 | `0x0040` | PV input 3 active                  | Confirmed  |
-|   7 | `0x0080` | PV input 4 active                  | Confirmed  |
+| Bit | Mask     | Working interpretation              | Confidence |
+| --: | -------- | ----------------------------------- | ---------- |
+|   0 | `0x0001` | MPPT stopped / parked / disabled    | Tentative  |
+|   1 | `0x0002` | unresolved                          | —          |
+|   2 | `0x0004` | MPPT controller initialized / ready | Strong     |
+|   3 | `0x0008` | unresolved                          | —          |
+|   4 | `0x0010` | PV input 1 active                   | Confirmed  |
+|   5 | `0x0020` | PV input 2 active                   | Confirmed  |
+|   6 | `0x0040` | PV input 3 active                   | Confirmed  |
+|   7 | `0x0080` | PV input 4 active                   | Confirmed  |
 | 8–15| `0x0100`–`0x8000` | unresolved              | —          |
 
 The full-battery tests exposed a useful controller-state sequence. Normal

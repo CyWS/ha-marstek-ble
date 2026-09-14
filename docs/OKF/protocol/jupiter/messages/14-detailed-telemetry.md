@@ -4,14 +4,14 @@ title: Jupiter-C Plus 0x14 detailed telemetry
 description: Inverter, grid, MPPT, PV-input, battery, and repeated battery-pack response layout.
 tags: [jupiter, ble, telemetry, inverter, mppt, bms]
 status: draft
-source_revision: "44aee70ecc78d854dd8170fbe0f19b24455d15d1"
-generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T12:45:00Z }
+source_revision: "03cd0abb9d3a3ac6421037a2f439a6aa9927cdb8"
+generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T16:30:00Z }
 sources:
   - id: sanitized-map
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/docs/sources/jupiter-c-plus-ble-field-map.md
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/03cd0abb9d3a3ac6421037a2f439a6aa9927cdb8/docs/sources/jupiter-c-plus-ble-field-map.md
     title: Sanitized Jupiter field map
   - id: model
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/products/jupiter.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/8bd07088c023f3dc263982170cd573df77ebaee0/custom_components/marstek_ble/products/jupiter.py
     title: Declarative Jupiter model
 ---
 
@@ -24,7 +24,7 @@ that structure by contiguous byte range without changing field order.
 
 | Range       | Structure                                                                      |
 | ----------- | ------------------------------------------------------------------------------ |
-| `0x00–0x1F` | Inverter state, errors, grid values, output, temperature, and discharge counters |
+| `0x00–0x1F` | Inverter state, errors, grid values, output, temperature, and output-energy counters |
 | `0x20–0x27` | MPPT state, errors, temperature, and warnings                                  |
 | `0x28–0x3F` | Four PV inputs, each voltage/current/power                                     |
 | `0x40–0x4F` | PV generation counters and one unknown range                                  |
@@ -57,6 +57,20 @@ The numeric mappings are confirmed. Based on general grid-tie inverter behaviour
 `0x040A` is tentatively associated with **overfrequency** and `0x0426` with
 **island / anti-islanding detection**. Those semantic labels remain tentative.
 
+# Output-energy counters
+
+The counters at `0x14`, `0x18`, and `0x1C` are modeled as daily, local cumulative,
+and monthly **output energy**. They track energy delivered through the device
+output path and must not be interpreted as battery-discharge energy. Output can
+be supplied directly by PV, by the battery, or by both. Their locations and
+scaling are stable, while the output-path semantic label remains Strong rather
+than vendor-confirmed.
+
+Battery-side cumulative charge/discharge energy is deliberately not synthesized
+from these counters. The signed battery voltage/current telemetry provides the
+appropriate instantaneous battery-side source for Home Assistant integration if
+such cumulative values are required.
+
 # Inverter field at `0x08`
 
 The two-byte field at `0x08` was previously interpreted as grid current.
@@ -70,17 +84,17 @@ longer exposes it as a Home Assistant `Grid Current` sensor.
 The 16-bit state word at `0x20` is preserved in full as `MPPT State Flags`. Only
 bits with repeated behavioral correlations have assigned meanings.
 
-| Bit  | Mask                | Working interpretation              | Confidence |
-| ---: | ------------------- | ----------------------------------- | ---------- |
-| 0    | `0x0001`            | MPPT stopped / parked / disabled    | Tentative  |
-| 1    | `0x0002`            | unresolved                          | —          |
-| 2    | `0x0004`            | MPPT controller initialized / ready | Strong     |
-| 3    | `0x0008`            | unresolved                          | —          |
-| 4    | `0x0010`            | PV input 1 active                   | Confirmed  |
-| 5    | `0x0020`            | PV input 2 active                   | Confirmed  |
-| 6    | `0x0040`            | PV input 3 active                   | Confirmed  |
-| 7    | `0x0080`            | PV input 4 active                   | Confirmed  |
-| 8–15 | `0x0100`–`0x8000`   | unresolved                          | —          |
+| Bit  | Mask                | Working interpretation               | Confidence |
+| ---: | ------------------- | ------------------------------------ | ---------- |
+| 0    | `0x0001`            | MPPT stopped / parked / disabled     | Tentative  |
+| 1    | `0x0002`            | unresolved                           | —          |
+| 2    | `0x0004`            | MPPT controller initialized / ready  | Strong     |
+| 3    | `0x0008`            | unresolved                           | —          |
+| 4    | `0x0010`            | PV input 1 active                    | Confirmed  |
+| 5    | `0x0020`            | PV input 2 active                    | Confirmed  |
+| 6    | `0x0040`            | PV input 3 active                    | Confirmed  |
+| 7    | `0x0080`            | PV input 4 active                    | Confirmed  |
+| 8–15 | `0x0100`–`0x8000`   | unresolved                           | —          |
 
 The forced-full-battery captures provide a useful state-machine sequence. Normal
 operation with all four PV inputs active used `0x00F4`, which is bit 2 plus bits
