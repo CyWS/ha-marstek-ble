@@ -4,26 +4,26 @@ title: ha-marstek-ble codebase overview
 description: Purpose, supported products, Home Assistant surfaces, product runtime structure, and repository layout.
 tags: [home-assistant, bluetooth, integration, architecture, venus, jupiter, multi-product]
 status: draft
-source_revision: "112abd322722b2e84bcdf34ee4b0325bf14b7313"
-generated: { by: openai/gpt-5.6-sol, at: 2026-08-09T10:50:00Z }
+source_revision: "44aee70ecc78d854dd8170fbe0f19b24455d15d1"
+generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T12:45:00Z }
 sources:
   - id: init
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/__init__.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/__init__.py
     title: Integration setup and product capabilities
   - id: runtime
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/product_runtime.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/product_runtime.py
     title: Generic product runtime
   - id: entities
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/product_entity_platform.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/product_entity_platform.py
     title: Declarative live entity synchronization
   - id: products
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/112abd322722b2e84bcdf34ee4b0325bf14b7313/custom_components/marstek_ble/products
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/tree/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/products
     title: Product definitions and runtimes
 ---
 
 # Purpose
 
-`ha-marstek-ble` is a Home Assistant custom integration for local Bluetooth Low Energy communication with Marstek energy-storage devices. The runtime currently supports Venus and Jupiter-C Plus as separate product families.
+`ha-marstek-ble` is a Home Assistant custom integration for local Bluetooth Low Energy communication with Marstek energy-storage devices. The runtime currently implements Venus and Jupiter-C Plus as separate product families.
 
 # Supported discovery surface
 
@@ -41,6 +41,10 @@ Sensor and binary-sensor entities are generated from product profiles for both r
 
 Venus additionally loads its existing `button`, `switch`, and `select` platforms. Jupiter remains read-only because its write/control command meanings have not been validated.
 
+# Validation boundary
+
+Runtime support and hardware validation are separate concepts. Jupiter-C Plus has been exercised on real hardware with the current multi-product implementation. The migrated Venus path is covered by automated regression/unit tests intended to preserve the original integration behavior, but this fork has not yet revalidated the refactored Venus path on a physical Venus device.
+
 # Runtime model
 
 `ProductRuntime` combines a `ProductProfile` with product-owned polling and any irregular payload parsers. `ProductProtocol` validates common Marstek framing and dispatches only to the selected runtime. `ProductDataUpdateCoordinator` reuses the shared BLE lifecycle and scheduling while holding the product-specific cumulative data object.
@@ -53,7 +57,7 @@ Venus additionally loads its existing `button`, `switch`, and `select` platforms
 | ---- | ---- |
 | `custom_components/marstek_ble/__init__.py` | Product selection, device registration, capability-aware platform forwarding |
 | `custom_components/marstek_ble/config_flow.py` | Bluetooth discovery and persisted product selection |
-| `custom_components/marstek_ble/product_runtime.py` | Generic runtime, polling command, frame parsing, update metadata |
+| `custom_components/marstek_ble/product_runtime.py` | Generic runtime, polling command validation, frame parsing, update metadata |
 | `custom_components/marstek_ble/product_coordinator.py` | Product-aware coordinator adapter |
 | `custom_components/marstek_ble/schema.py` | Declarative binary field/repeated-section parsing |
 | `custom_components/marstek_ble/entity.py` | Product profiles, entity/device bindings, repeated topology |
@@ -68,4 +72,4 @@ Venus additionally loads its existing `button`, `switch`, and `select` platforms
 
 # Polling configuration
 
-Fast polling is configurable from `1–60 s` and medium polling from `5–300 s`; medium polling is clamped to at least the fast interval.
+Fast polling is configurable from `1–60 s` and medium polling from `5–300 s`; medium polling is clamped to at least the fast interval. The actual command schedules are product-specific and constrained by each runtime's supported-command policy.
