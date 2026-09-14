@@ -1,5 +1,13 @@
 # Marstek BLE OKF update log
 
+## 2026-09-14
+
+- **Release preparation**: Reconciled the physically tested Jupiter diagnostic branch with the supported-command branch without reintroducing unresolved Jupiter polling commands.
+- **Jupiter diagnostics**: Restored the tested diagnostic-only MPPT/PV state observations, tentative base/PE voltages, diagnostic classifications, and compact event-history entities while retaining the newer grid-validity, inverter-error, and 16-bit event-code interpretations.
+- **Polling safety**: Confirmed Jupiter remains read-only and limited to the explicit supported-command set plus the model-identification exception. Commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` remain unpolled.
+- **Operational status caution**: Retained the bit-1 diagnostic observation at runtime offset `0x3C` but explicitly documented that it is not a confirmed representation of the user-facing surplus-feed-in setting.
+- **Release documentation**: Updated repository metadata, HACS installation instructions, supported-device documentation, and isolated-test documentation for the first multi-product release candidate.
+
 ## 2026-08-13
 
 - **Supported polling commands**: Added explicit per-product supported-command sets and runtime validation. The product-identification request `0x04` remains available outside those sets. Jupiter no longer polls unresolved commands `0x21`, `0x22`, or `0x24`; its existing exclusions for `0x1A` and `0x1C` remain.
