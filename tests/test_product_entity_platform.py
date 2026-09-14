@@ -145,7 +145,8 @@ def test_setup_product_entity_platform_subscribes_and_populates_immediately() ->
         for batch in batches
         for binding in batch
     }
-    assert "ac_output_active" in initial_keys
+    assert "grid_connection_valid" in initial_keys
+    assert "ac_output_active" not in initial_keys
     assert "pv_inputs_0_connected" in initial_keys
     assert "pv_inputs_3_connected" in initial_keys
 
