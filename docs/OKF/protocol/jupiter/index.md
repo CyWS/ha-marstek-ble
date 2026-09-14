@@ -4,14 +4,14 @@ title: Jupiter-C Plus BLE protocol
 description: Progressive entry point for sanitized Jupiter packet schemas, runtime behavior, live entities, and battery-expansion topology.
 tags: [jupiter, ble, protocol, index]
 status: draft
-source_revision: "44aee70ecc78d854dd8170fbe0f19b24455d15d1"
-generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T12:45:00Z }
+source_revision: "31ed2118ab83628574d51c0f2f5af2fe2787e0e8"
+generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T16:08:00Z }
 sources:
   - id: sanitized-map
     resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/docs/sources/jupiter-c-plus-ble-field-map.md
     title: Sanitized Jupiter-C Plus BLE field map
   - id: model
-    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/products/jupiter.py
+    resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/31ed2118ab83628574d51c0f2f5af2fe2787e0e8/custom_components/marstek_ble/products/jupiter.py
     title: Jupiter product model
   - id: runtime
     resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/44aee70ecc78d854dd8170fbe0f19b24455d15d1/custom_components/marstek_ble/products/jupiter_runtime.py
@@ -36,5 +36,7 @@ The current read-only runtime polls:
 Jupiter does **not** poll `0x1A`, `0x1C`, `0x21`, `0x22`, or `0x24`. The first two have no retained Jupiter response structure; the latter three produced unresolved one-byte replies during earlier investigation and are excluded from the supported polling command set because their Jupiter semantics are not established. The model-identification request `0x04` remains the sole polling exception to the per-product supported-command set.
 
 The declarative sensor and binary-sensor entity plan is live. This includes the four PV inputs, compact event-history diagnostics, and child devices for populated battery-pack positions. Newly reported battery positions are added without renumbering existing children; disappearing positions become unavailable. Venus write/control platforms remain disabled for Jupiter.
+
+Battery voltage and signed battery current also feed three derived power entities: signed `Battery Power`, non-negative charging `Battery Power In`, and non-negative discharging `Battery Power Out`. Positive signed power represents charging. The directional sensors do not add a new packet interpretation; they split the already modeled signed battery power into charge/discharge directions for Home Assistant consumers such as the Energy Dashboard or Integral helpers.
 
 Runtime-enabled describes implementation status, not vendor confirmation of every interpreted field. Tentative and unverified Jupiter observations remain explicitly labeled in the detailed message concepts.
