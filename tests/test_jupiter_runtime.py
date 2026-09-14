@@ -25,15 +25,13 @@ def test_jupiter_runtime_is_registered_for_product_id_and_discovery_name() -> No
     assert JUPITER_RUNTIME.matches_name("MST_ACCP_TEST") is False
 
 
-def test_jupiter_poll_schedule_uses_only_observed_response_commands() -> None:
+def test_jupiter_poll_schedule_uses_only_supported_response_commands() -> None:
     fast = [command.command for command in JUPITER_RUNTIME.fast_poll]
     medium = [command.command for command in JUPITER_RUNTIME.medium_poll]
 
     assert fast == [0x03, 0x14]
-    assert medium == [0x0D, 0x08, 0x22, 0x21, 0x24, 0x04, 0x13]
-    assert JUPITER_RUNTIME.medium_poll[3].payload == b"\x0b"
-    assert 0x1A not in fast + medium
-    assert 0x1C not in fast + medium
+    assert medium == [0x0D, 0x08, 0x04, 0x13]
+    assert set(fast + medium).isdisjoint({0x1A, 0x1C, 0x21, 0x22, 0x24})
 
 
 def test_jupiter_runtime_summary_parses_pv_power_and_system_values() -> None:
