@@ -1,5 +1,36 @@
 # Agent instructions
 
+## Repository authorization and mutation boundaries
+
+Repository access is read-only by default except for the standing authorization
+below or an explicit instruction from the repository owner in the current task.
+
+Standing authorization permits agents to:
+
+- create or modify code, tests, documentation, workflow files, and other tracked
+  repository files on branches other than `main`;
+- create commits containing those changes on branches other than `main`; and
+- create pull requests proposing those changes.
+
+Anything outside that scope requires explicit approval from the repository owner
+before the action is performed. In particular:
+
+- never write, commit, merge, force-update, or otherwise modify `main` directly
+  without explicit approval;
+- never change repository settings or repository metadata without explicit
+  approval, including topics, description, homepage, visibility, default branch,
+  merge settings, branch protection or rulesets, Actions settings or permissions,
+  secrets or variables, webhooks, collaborators, or similar administrative state;
+- do not treat a technically available GitHub API operation as authorization to
+  perform it; and
+- when uncertain whether an operation is a tracked-file/commit change or a
+  repository-administration change, treat it as requiring explicit approval.
+
+Read-only inspection of repository state and metadata is allowed when needed to
+understand or diagnose a task.
+
+Do not manually trigger, rerun, or otherwise start GitHub Actions workflows.
+
 ## Use the OKF bundle first
 
 Repository knowledge intended for agents is stored in `docs/OKF/` using Open
