@@ -2,15 +2,24 @@
 
 Home Assistant integration for supported Marstek energy-storage systems over Bluetooth Low Energy (BLE).
 
-This repository is preparing its first multi-product release. Venus E support includes monitoring and the existing write/control features. Jupiter-C Plus support is currently read-only while command semantics are still being validated.
+> [!IMPORTANT]
+> **AI-assisted development**
+>
+> Significant parts of the multi-product work in this fork were developed with assistance from large language models. AI tools were used to analyze the existing codebase and sanitized diagnostics, help reverse-engineer protocol behavior, propose and write implementation changes, create tests, review failures, and draft documentation. The human maintainer defined the goals, supplied hardware observations, reviewed the changes, and ran the local and real-device tests that were available.
+>
+> AI-generated analysis and code are not independent verification. Protocol interpretations may be wrong, and passing automated tests do not prove compatibility with hardware that has not been tested. Assistant-authored commits are identified in their commit messages where applicable.
+
+This repository is preparing its first multi-product release. Jupiter-C Plus has been exercised against real hardware and is intentionally read-only. The current multi-product Venus code path has **not** been tested against a physical Venus device; Venus compatibility is based on regression/unit tests that indicate the refactor should preserve the behavior of the original integration.
 
 ## Supported devices
 
-| Product | BLE prefix | Status | Monitoring | Controls |
-| ------- | ---------- | ------ | ---------- | -------- |
-| Marstek Venus E hardware v2 | `MST_ACCP_*` | Tested | Yes | Yes |
-| Marstek Venus E hardware v3 | `MST_VNSE3_*` | Untested | Yes | Yes |
-| Marstek Jupiter-C Plus | `MST_JPLS_*` | Tested | Yes | No, read-only |
+| Product | BLE prefix | Current validation status | Monitoring | Controls |
+| ------- | ---------- | ------------------------- | ---------- | -------- |
+| Marstek Venus E hardware v2 | `MST_ACCP_*` | Expected compatible; regression/unit tested, not hardware-retested after the refactor | Yes | Yes, expected compatible |
+| Marstek Venus E hardware v3 | `MST_VNSE3_*` | Expected compatible; regression/unit tested, not hardware-validated in this fork | Yes | Yes, expected compatible |
+| Marstek Jupiter-C Plus | `MST_JPLS_*` | Tested on real hardware | Yes | No, read-only |
+
+For Venus, **supported** means that the implementation and automated compatibility tests are present. It does not currently mean that this fork has been verified on a physical Venus system. Reports from Venus users are especially useful during the release-candidate phase.
 
 Jupiter-C Plus expansion batteries are represented as child devices using their physical pack position as the stable identifier. Only populated battery positions are exposed.
 
@@ -23,7 +32,7 @@ Jupiter-C Plus expansion batteries are represented as child devices using their 
 - Product-specific packet parsing and polling schedules.
 - Battery, inverter/grid, PV, energy, temperature, firmware, and diagnostic telemetry where supported by the selected product.
 - Home Assistant child devices for Jupiter-C Plus base/expansion battery packs.
-- Existing Venus E output, mode, and configuration controls.
+- The original Venus monitoring and control surfaces are retained by the implementation and covered by compatibility tests, but have not yet been revalidated on physical Venus hardware after the multi-product refactor.
 
 ## Installation
 
@@ -58,7 +67,16 @@ Repeat this process for each Marstek device you want to add.
 
 ### Venus E
 
-Venus E retains the integration's existing monitoring and write/control functionality. Depending on the device/firmware this includes battery telemetry, energy counters, output control, EPS-related controls, power limits, manual/self-consumption modes, and adaptive/AI-related controls.
+The current implementation is intended to preserve the original integration's Venus monitoring and write/control behavior. Automated compatibility and regression tests cover the migrated Venus runtime, parsing, entity generation, polling schedule, and legacy control platforms, but no physical Venus device was available for validation of this release candidate.
+
+Implemented Venus controls currently include:
+
+- `Output 1 Control`, `EPS Mode`, `AC Input`, `Generator`, and `Buzzer` switches;
+- an `Operating Mode` select for **Self-Consumption** and **Manual**;
+- `Charge Mode` and `CT Polling Rate` selects; and
+- reboot plus fixed power-mode/power-limit buttons.
+
+The current code does **not** expose AI Optimization as a BLE control. Any Venus behavior that depends on device or firmware details should therefore be considered expected compatibility until it has been confirmed on real hardware.
 
 ### Jupiter-C Plus
 
@@ -74,7 +92,7 @@ Jupiter support is intentionally **read-only** in the first multi-product releas
 
 No Jupiter `button`, `switch`, or `select` entities are created. Commands whose Jupiter semantics are unresolved are not polled.
 
-Some Jupiter diagnostic entities intentionally include words such as **Unverified**. These represent useful reverse-engineering observations, not vendor-confirmed semantics.
+Some Jupiter diagnostic entities intentionally include words such as **Unverified**. These represent useful reverse-engineering observations, not vendor-confirmed semantics. In particular, `Surplus Feed-In Active Unverified` must not be interpreted as a confirmed representation of the user-facing surplus-feed-in setting.
 
 ## Polling
 
@@ -90,6 +108,8 @@ Actual commands are product-specific. For Jupiter-C Plus the current read-only s
 
 Jupiter commands `0x1A`, `0x1C`, `0x21`, `0x22`, and `0x24` are not polled because their semantics are absent or unresolved.
 
+Venus keeps its own product-specific polling schedule. Automated tests verify that the refactored schedule matches the intended Venus behavior, but that schedule has not yet been revalidated against Venus hardware in this fork.
+
 ## BLE proxy setup
 
 To extend Bluetooth range, configure an [ESPHome Bluetooth Proxy](https://esphome.io/components/bluetooth_proxy/). One proxy can serve multiple Marstek devices.
@@ -104,19 +124,20 @@ Typical local checks are:
 just install-quality
 just check
 just coverage
+tox
 ```
 
-The full issue-inventory suite also includes tests marked `known_issue` and may intentionally fail for unresolved defects:
+A separate genuine Home Assistant test harness is available for config-flow and integration-lifecycle testing while still mocking Bluetooth/device hardware.
 
-```bash
-just test-known-issues
-```
+Tests marked `known_issue` are used as an unresolved-defect inventory. At the time of this release preparation the inventory is empty; `just test-known-issues` also treats an empty selection as success.
 
-A separate genuine Home Assistant test harness is available for integration lifecycle/config-flow testing. See [`tests/README.md`](tests/README.md) and the `justfile` for the available test commands.
+See [`tests/README.md`](tests/README.md), [`docs/RELEASE.md`](docs/RELEASE.md), and the `justfile` for the available test and release commands.
 
 ## Reporting problems
 
-Please include the Home Assistant version, integration version/commit, Marstek product, and relevant sanitized logs when opening an issue. Do not publish device identifiers, MAC addresses, Wi-Fi names, account/cloud identifiers, or complete private diagnostic captures.
+Please include the Home Assistant version, integration version/commit, Marstek product, and relevant sanitized logs when opening an issue. For Venus reports, also include the hardware revision/prefix and firmware version where possible because the current multi-product branch has not been physically validated on Venus hardware.
+
+Do not publish device identifiers, MAC addresses, Wi-Fi names, account/cloud identifiers, or complete private diagnostic captures.
 
 ## Attribution
 
