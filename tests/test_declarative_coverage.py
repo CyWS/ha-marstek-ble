@@ -446,7 +446,8 @@ def test_jupiter_profile_packet_contract_and_empty_data_shape() -> None:
     assert packets[0x03] is JupiterPackets.RUNTIME_INFORMATION
     assert packets[0x13] is JupiterPackets.EVENT_HISTORY
     assert packets[0x14] is JupiterPackets.DETAILED_TELEMETRY
-    assert packets[0x03].minimum_length == packets[0x03].maximum_length == 74
+    assert packets[0x03].minimum_length == 61
+    assert packets[0x03].maximum_length == 74
     assert packets[0x13].minimum_length == packets[0x13].maximum_length == 160
     assert packets[0x14].minimum_length == packets[0x14].maximum_length == 165
 

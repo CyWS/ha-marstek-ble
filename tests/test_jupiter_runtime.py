@@ -96,6 +96,33 @@ def test_jupiter_runtime_summary_parses_pv_power_and_system_values() -> None:
     assert data.out1_active is True
 
 
+def test_jupiter_runtime_packet_parses_shorter_field_hardware_variant() -> None:
+    """A firmware variant observed in the wild sends only 67 bytes for 0x03.
+
+    Every currently-mapped field fits within the first 61 bytes, so a
+    schema that only accepts the maintainer's 74-byte layout rejects an
+    otherwise fully decodable, shorter payload. Regression for that.
+    """
+
+    data = JUPITER_RUNTIME.create_data()
+
+    payload = bytearray(61)
+    payload[12:14] = struct.pack("<H", 640)
+    payload[18] = 1
+    payload[19:21] = struct.pack("<H", 250)
+    payload[21] = 73
+    payload[60] = 5
+
+    paths = JUPITER_RUNTIME.parse_payload(0x03, bytes(payload), data)
+
+    assert paths is not None
+    assert data.runtime.ac_output_power == 640.0
+    assert data.runtime.battery_charging_active is True
+    assert data.runtime.stored_battery_energy == 2500.0
+    assert data.runtime.battery_soc == 73.0
+    assert data.runtime.operational_status == 5
+
+
 def test_jupiter_detailed_telemetry_parses_signed_battery_and_pack_records() -> None:
     data = JUPITER_RUNTIME.create_data()
     payload = bytearray(165)
