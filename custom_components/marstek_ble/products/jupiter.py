@@ -44,7 +44,7 @@ def _event_summary(values: tuple[int, int, int, int, int, int, int]) -> str:
 class JupiterPackets:
     """Observed Jupiter-C Plus response schemas."""
 
-    RUNTIME_INFORMATION = PacketSchema("jupiter_runtime_information", 0x03, 74, 74)
+    RUNTIME_INFORMATION = PacketSchema("jupiter_runtime_information", 0x03, 61, 74)
     DEVICE_INFORMATION = PacketSchema("jupiter_device_information", 0x04)
     WIFI_SSID = PacketSchema("jupiter_wifi_ssid", 0x08)
     UNRESOLVED_STATUS = PacketSchema("jupiter_unresolved_status", 0x0D, 12, 12)
