@@ -23,7 +23,7 @@ Jupiter runtime does not send `0x1A`, `0x1C`, `0x21`, `0x22`, or `0x24`.
 
 | Command | Payload length | Status                         |
 | ------- | -------------: | ------------------------------ |
-| `0x03`  |             74 | Runtime summary                |
+| `0x03`  |         61–74 | Runtime summary                |
 | `0x04`  |             97 | ASCII device information       |
 | `0x08`  |       variable | ASCII Wi-Fi SSID               |
 | `0x0D`  |             12 | Structure unresolved           |
@@ -105,6 +105,19 @@ transiently before the persistent `0x0426`. Based on common grid-tie inverter
 behaviour, `0x040A` is tentatively associated with **overfrequency** and `0x0426`
 with **island / anti-islanding detection**. Those semantic names remain
 Tentative; the numeric field mapping is Confirmed.
+
+### `0x03` payload length varies by hardware/firmware
+
+On at least one confirmed unit, `0x03` responses are consistently 67 bytes,
+not 74: the unresolved trailer at `0x3D` is 6 bytes instead of 13, and the
+byte at `0x3D` shifts down accordingly. Every field mapped above through
+`0x3C` (inclusive) fits within the shorter payload unchanged; only the
+unresolved trailing bytes are shorter. A response-length check that rejects
+anything other than exactly 74 bytes therefore drops an otherwise fully
+decodable frame on that hardware. This mirrors the `0x14` payload-length
+finding below: treat the declared length as an upper bound observed on one
+unit, not a fixed contract across all Jupiter-C Plus units and firmware
+versions.
 
 ## `0x04` device information
 

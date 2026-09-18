@@ -17,7 +17,9 @@ sources:
 
 # Response
 
-Payload length: 74 bytes. Offsets are relative to the payload.
+Payload length: 74 bytes on at least one observed unit; a second confirmed
+unit consistently sends 67 bytes instead (see "Payload length varies by
+hardware/firmware" below). Offsets are relative to the payload.
 
 | Offset | Length | Type          | Name                      | Canonical value                         | Confidence |
 | -----: | -----: | ------------- | ------------------------- | --------------------------------------- | ---------- |
@@ -97,3 +99,13 @@ The stored-energy, state-of-charge, generation, output-energy, firmware, and
 inverter-error fields share canonical destinations with more precise or duplicate
 fields in `0x14`. The latest successfully parsed packet updates the cumulative
 value.
+
+# Payload length varies by hardware/firmware
+
+The 74-byte length above was observed on one unit. A second confirmed unit
+sends 67 bytes for the same command: every field mapped through `0x3C`
+(inclusive) is unchanged, and only the unresolved trailer at `0x3D` is
+shorter (6 bytes instead of 13). A response-length check pinned to exactly
+74 bytes rejects this otherwise fully decodable, shorter frame outright.
+Treat 74 as an observed upper bound on one unit, not a fixed contract across
+all Jupiter-C Plus hardware and firmware revisions.

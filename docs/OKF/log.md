@@ -3,6 +3,7 @@
 ## 2026-09-18
 
 - **Jupiter `0x14` payload length and BMS firmware version width**: Corrected the declared payload length for `0x14` `jupiter_detailed_telemetry` from an unconditional 166 bytes to 165 bytes, confirmed on a JPLS-8H, firmware V133, no expansion batteries, across two independent captures plus a 20-request repeatability burst. Root cause: `0x64` BMS firmware version was declared as a 2-byte `u16` but is a constant single byte on this device; the strict exact-length packet schema discarded every `0x14` packet outright, leaving every Jupiter entity `unknown`. Every field from the old `0x65` onward, including the repeated battery-pack records and `stored_battery_energy`, shifts by −1 and now decodes to independently plausible values (matching an external field map, the device's own cloud-reported values, a base-only pack count of 1, and previously unexamined per-cell voltages). Whether other Jupiter-C Plus hardware/firmware combinations genuinely use a distinct 166-byte layout with a real 2-byte firmware version remains open.
+- **Jupiter `0x03` payload length**: A second confirmed Jupiter-C Plus unit consistently sends 67-byte `0x03` responses instead of the previously assumed fixed 74 bytes. Every field mapped through offset `0x3C` (inclusive) is unchanged; only the unresolved trailing bytes are shorter (6 instead of 13). The response-length check was relaxed to accept 61–74 bytes so the shorter, otherwise fully decodable frame is no longer rejected outright.
 
 ## 2026-09-14
 
