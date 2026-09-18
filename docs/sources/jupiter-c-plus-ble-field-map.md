@@ -305,7 +305,7 @@ the inspected captures. Bits 1, 3, and 8–15 remain unresolved.
 
 ### Battery-pack summary record
 
-The records begin at offsets `0x7A`, `0x82`, `0x8A`, and `0x92`. Index 0 is the
+The records begin at offsets `0x79`, `0x81`, `0x89`, and `0x91`. Index 0 is the
 base battery; indices 1–3 are expansion positions.
 
 | Relative offset | Length | Type     | Field                      | Unit       | Confidence |

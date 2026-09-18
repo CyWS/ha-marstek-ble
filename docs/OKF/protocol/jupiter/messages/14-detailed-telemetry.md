@@ -145,7 +145,7 @@ contain:
 # Battery-pack records
 
 The four 8-byte records start at `0x79`. Record 0 represents the base battery;
-records 1–3 represent expansion positions. The populated-record count at `0x76`
+records 1–3 represent expansion positions. The populated-record count at `0x75`
 controls record presence and child-device/entity creation. Newly reported
 positions can be added by the live entity manager without renumbering existing
 children; if the count later decreases, previously created entities for absent
