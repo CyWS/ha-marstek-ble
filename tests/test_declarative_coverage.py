@@ -448,7 +448,7 @@ def test_jupiter_profile_packet_contract_and_empty_data_shape() -> None:
     assert packets[0x14] is JupiterPackets.DETAILED_TELEMETRY
     assert packets[0x03].minimum_length == packets[0x03].maximum_length == 74
     assert packets[0x13].minimum_length == packets[0x13].maximum_length == 160
-    assert packets[0x14].minimum_length == packets[0x14].maximum_length == 166
+    assert packets[0x14].minimum_length == packets[0x14].maximum_length == 165
 
 
 def test_jupiter_runtime_packet_parses_summary_and_four_pv_inputs() -> None:
@@ -505,7 +505,7 @@ def test_jupiter_runtime_packet_parses_summary_and_four_pv_inputs() -> None:
 
 def test_jupiter_detailed_packet_parses_scaled_and_repeated_battery_data() -> None:
     data = JupiterData()
-    payload = bytearray(166)
+    payload = bytearray(165)
     payload[0x06:0x08] = struct.pack("<H", 2305)
     payload[0x08:0x0A] = struct.pack("<H", 123)
     payload[0x0C:0x0E] = struct.pack("<H", 5001)
@@ -526,17 +526,17 @@ def test_jupiter_detailed_packet_parses_scaled_and_repeated_battery_data() -> No
     payload[0x5E:0x60] = struct.pack("<H", 88)
     payload[0x60:0x62] = struct.pack("<H", 97)
     payload[0x62:0x64] = struct.pack("<H", 2560)
-    payload[0x64:0x66] = struct.pack("<H", 42)
-    payload[0x66:0x68] = struct.pack("<H", 5123)
-    payload[0x68:0x6A] = struct.pack("<h", -123)
-    payload[0x6A:0x6C] = struct.pack("<h", 247)
-    payload[0x76:0x78] = struct.pack("<H", 2)
-    payload[0x78:0x7A] = struct.pack("<H", 2048)
+    payload[0x64] = 42
+    payload[0x65:0x67] = struct.pack("<H", 5123)
+    payload[0x67:0x69] = struct.pack("<h", -123)
+    payload[0x69:0x6B] = struct.pack("<h", 247)
+    payload[0x75:0x77] = struct.pack("<H", 2)
+    payload[0x77:0x79] = struct.pack("<H", 2048)
 
     for index, (high_index, low_index, high_mv, low_mv, status) in enumerate(
         ((7, 3, 3345, 3299, 0x10), (8, 2, 3350, 3301, 0x20))
     ):
-        offset = 0x7A + index * 8
+        offset = 0x79 + index * 8
         payload[offset] = high_index
         payload[offset + 1] = low_index
         payload[offset + 2 : offset + 4] = struct.pack("<H", high_mv)

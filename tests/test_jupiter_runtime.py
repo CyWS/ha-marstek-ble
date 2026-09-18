@@ -98,7 +98,7 @@ def test_jupiter_runtime_summary_parses_pv_power_and_system_values() -> None:
 
 def test_jupiter_detailed_telemetry_parses_signed_battery_and_pack_records() -> None:
     data = JUPITER_RUNTIME.create_data()
-    payload = bytearray(166)
+    payload = bytearray(165)
 
     payload[6:8] = struct.pack("<H", 2305)
     payload[12:14] = struct.pack("<H", 5000)
@@ -113,23 +113,23 @@ def test_jupiter_detailed_telemetry_parses_signed_battery_and_pack_records() -> 
     payload[94:96] = struct.pack("<H", 68)
     payload[96:98] = struct.pack("<H", 97)
     payload[98:100] = struct.pack("<H", 7680)
-    payload[102:104] = struct.pack("<H", 5123)
-    payload[104:106] = struct.pack("<h", -123)
-    payload[106:108] = struct.pack("<h", 245)
-    payload[118:120] = struct.pack("<H", 2)
-    payload[120:122] = struct.pack("<H", 4321)
+    payload[101:103] = struct.pack("<H", 5123)
+    payload[103:105] = struct.pack("<h", -123)
+    payload[105:107] = struct.pack("<h", 245)
+    payload[117:119] = struct.pack("<H", 2)
+    payload[119:121] = struct.pack("<H", 4321)
 
-    payload[122] = 7
-    payload[123] = 3
-    payload[124:126] = struct.pack("<H", 3345)
-    payload[126:128] = struct.pack("<H", 3298)
-    payload[128:130] = struct.pack("<H", 1)
+    payload[121] = 7
+    payload[122] = 3
+    payload[123:125] = struct.pack("<H", 3345)
+    payload[125:127] = struct.pack("<H", 3298)
+    payload[127:129] = struct.pack("<H", 1)
 
-    payload[130] = 8
-    payload[131] = 2
-    payload[132:134] = struct.pack("<H", 3350)
-    payload[134:136] = struct.pack("<H", 3301)
-    payload[136:138] = struct.pack("<H", 2)
+    payload[129] = 8
+    payload[130] = 2
+    payload[131:133] = struct.pack("<H", 3350)
+    payload[133:135] = struct.pack("<H", 3301)
+    payload[135:137] = struct.pack("<H", 2)
 
     paths = JUPITER_RUNTIME.parse_payload(0x14, bytes(payload), data)
 
@@ -192,9 +192,9 @@ def test_jupiter_protocol_tracks_canonical_and_legacy_metadata(monkeypatch) -> N
         lambda: 200.0,
     )
 
-    payload = bytearray(166)
-    payload[102:104] = struct.pack("<H", 5050)
-    payload[104:106] = struct.pack("<h", 100)
+    payload = bytearray(165)
+    payload[101:103] = struct.pack("<H", 5050)
+    payload[103:105] = struct.pack("<h", 100)
 
     assert protocol.parse_notification(frame(0x14, payload), data) is True
     assert data.battery_voltage == pytest.approx(50.5)

@@ -15,7 +15,7 @@ def test_interpreted_status_bits_are_binary_entities() -> None:
     data = JupiterData()
     runtime_payload = bytearray(74)
     runtime_payload[0x3C] = 0b00000010
-    detail_payload = bytearray(166)
+    detail_payload = bytearray(165)
     detail_payload[0x20:0x22] = struct.pack("<H", 0b11110100)
 
     parse_into(runtime_payload, JupiterPackets.RUNTIME_INFORMATION, data)
@@ -47,7 +47,7 @@ def test_interpreted_status_bits_are_binary_entities() -> None:
 def test_interpreted_status_bits_clear_independently() -> None:
     data = JupiterData()
     runtime_payload = bytearray(74)
-    detail_payload = bytearray(166)
+    detail_payload = bytearray(165)
     detail_payload[0x20:0x22] = struct.pack("<H", 0b01010000)
 
     parse_into(runtime_payload, JupiterPackets.RUNTIME_INFORMATION, data)
@@ -83,7 +83,7 @@ def test_event_history_exposes_compact_record_and_preserves_event_code() -> None
 
 def test_tentative_base_and_pe_voltages_are_diagnostic_entities() -> None:
     data = JupiterData()
-    payload = bytearray(166)
+    payload = bytearray(165)
     payload[0x54:0x56] = struct.pack("<H", 523)
     payload[0x56:0x58] = struct.pack("<H", 17)
     parse_into(payload, JupiterPackets.DETAILED_TELEMETRY, data)

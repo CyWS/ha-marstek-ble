@@ -61,7 +61,7 @@ def test_jupiter_output_energy_counters_parse_from_runtime_and_detail_packets() 
     assert data.energy.daily_output_energy == pytest.approx(12.34)
     assert data.energy.monthly_output_energy == pytest.approx(56.78)
 
-    detail = bytearray(166)
+    detail = bytearray(165)
     detail[0x14:0x18] = struct.pack("<I", 2345)
     detail[0x18:0x1C] = struct.pack("<I", 6789)
     detail[0x1C:0x20] = struct.pack("<I", 3456)
@@ -74,7 +74,7 @@ def test_jupiter_output_energy_counters_parse_from_runtime_and_detail_packets() 
 
 def test_jupiter_legacy_discharge_accessors_follow_output_energy_fields() -> None:
     data = JUPITER_RUNTIME.create_data()
-    detail = bytearray(166)
+    detail = bytearray(165)
     detail[0x14:0x18] = struct.pack("<I", 111)
     detail[0x18:0x1C] = struct.pack("<I", 222)
     detail[0x1C:0x20] = struct.pack("<I", 333)
