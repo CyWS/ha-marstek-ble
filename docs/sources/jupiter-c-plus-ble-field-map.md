@@ -28,7 +28,7 @@ Jupiter runtime does not send `0x1A`, `0x1C`, `0x21`, `0x22`, or `0x24`.
 | `0x08`  |       variable | ASCII Wi-Fi SSID               |
 | `0x0D`  |             12 | Structure unresolved           |
 | `0x13`  |            160 | Twenty 8-byte event records    |
-| `0x14`  |            166 | Detailed inverter/MPPT/BMS     |
+| `0x14`  |        165–166 | Detailed inverter/MPPT/BMS     |
 | `0x21`  |              1 | Meaning unresolved             |
 | `0x22`  |              1 | Meaning unresolved             |
 | `0x24`  |              1 | Meaning unresolved             |
@@ -153,6 +153,18 @@ for tentative correlations explicitly documented above.
 
 ## `0x14` detailed telemetry
 
+Payload length is confirmed as **165 bytes** on a JPLS-8H, firmware V133, no
+expansion batteries (repeated captures, including a 20-request repeatability
+burst over one connection; see the note after the table). The table below
+reflects that 165-byte layout. This map previously declared an unconditional
+166-byte length with a 2-byte `0x64` field; the traced cause was that `0x64`
+BMS firmware version is only 1 byte wide on this device, which offsets every
+field from the old `0x65` onward by −1. Whether other Jupiter-C Plus
+hardware/firmware combinations genuinely use a 166-byte layout with a real
+2-byte firmware version (rather than the same 165-byte layout) is not yet
+established — this needs reconciling against a capture from a device other
+than the one this correction is based on.
+
 | Offset | Length | Type           | Name                                     | Unit / scale | Confidence |
 | -----: | -----: | -------------- | ---------------------------------------- | ------------ | ---------- |
 | `0x00` |      2 | `u16 bitfield` | Inverter operating-state flags           | raw          | Strong     |
@@ -198,25 +210,42 @@ for tentative correlations explicitly documented above.
 | `0x5E` |      2 | `u16 LE`       | Battery state of charge                  | %            | Confirmed  |
 | `0x60` |      2 | `u16 LE`       | Battery state of health                  | %            | Strong     |
 | `0x62` |      2 | `u16 LE`       | Rated battery capacity                   | Wh           | Confirmed  |
-| `0x64` |      2 | `u16 LE`       | BMS firmware version                     | raw version  | Confirmed  |
-| `0x66` |      2 | `u16 LE`       | Battery voltage                          | 0.01 V       | Confirmed  |
-| `0x68` |      2 | `i16 LE`       | Battery current; positive means charging | 0.1 A        | Confirmed  |
-| `0x6A` |      2 | `i16 LE`       | Battery temperature                      | 0.1 °C       | Strong     |
-| `0x6C` |      2 | `u16 LE`       | BMS error code 1                         | raw          | Strong     |
-| `0x6E` |      2 | `u16 LE`       | BMS warning code 1                       | raw          | Strong     |
-| `0x70` |      2 | `u16 LE`       | BMS error code 2                         | raw          | Strong     |
-| `0x72` |      2 | `u16 LE`       | BMS warning code 2                       | raw          | Strong     |
-| `0x74` |      1 | `u8 bitfield`  | Cell flags                               | raw          | Strong     |
-| `0x75` |      1 | `u8 bitfield`  | BMS status flags                         | raw          | Strong     |
-| `0x76` |      2 | `u16 LE`       | Populated battery-pack record count      | count        | Strong     |
-| `0x78` |      2 | `u16 LE`       | Stored battery energy                    | Wh           | Confirmed  |
-| `0x7A` |     32 | repeated       | Four 8-byte battery-pack summary records | —            | Strong     |
-| `0x9A` |      2 | `i16 LE`       | Battery temperature sensor 1             | °C           | Strong     |
-| `0x9C` |      2 | `i16 LE`       | Battery temperature sensor 2             | °C           | Strong     |
-| `0x9E` |      2 | `i16 LE`       | Battery temperature sensor 3             | °C           | Strong     |
-| `0xA0` |      2 | `i16 LE`       | Battery temperature sensor 4             | °C           | Strong     |
-| `0xA2` |      2 | `i16 LE`       | BMS/environment temperature              | °C           | Strong     |
-| `0xA4` |      2 | `i16 LE`       | BMS MOSFET temperature                   | °C           | Strong     |
+| `0x64` |      1 | `u8`           | BMS firmware version                     | raw version  | Confirmed  |
+| `0x65` |      2 | `u16 LE`       | Battery voltage                          | 0.01 V       | Confirmed  |
+| `0x67` |      2 | `i16 LE`       | Battery current; positive means charging | 0.1 A        | Confirmed  |
+| `0x69` |      2 | `i16 LE`       | Battery temperature                      | 0.1 °C       | Strong     |
+| `0x6B` |      2 | `u16 LE`       | BMS error code 1                         | raw          | Strong     |
+| `0x6D` |      2 | `u16 LE`       | BMS warning code 1                       | raw          | Strong     |
+| `0x6F` |      2 | `u16 LE`       | BMS error code 2                         | raw          | Strong     |
+| `0x71` |      2 | `u16 LE`       | BMS warning code 2                       | raw          | Strong     |
+| `0x73` |      1 | `u8 bitfield`  | Cell flags                               | raw          | Strong     |
+| `0x74` |      1 | `u8 bitfield`  | BMS status flags                         | raw          | Strong     |
+| `0x75` |      2 | `u16 LE`       | Populated battery-pack record count      | count        | Strong     |
+| `0x77` |      2 | `u16 LE`       | Stored battery energy                    | Wh           | Confirmed  |
+| `0x79` |     32 | repeated       | Four 8-byte battery-pack summary records | —            | Strong     |
+| `0x99` |      2 | `i16 LE`       | Battery temperature sensor 1             | °C           | Strong     |
+| `0x9B` |      2 | `i16 LE`       | Battery temperature sensor 2             | °C           | Strong     |
+| `0x9D` |      2 | `i16 LE`       | Battery temperature sensor 3             | °C           | Strong     |
+| `0x9F` |      2 | `i16 LE`       | Battery temperature sensor 4             | °C           | Strong     |
+| `0xA1` |      2 | `i16 LE`       | BMS/environment temperature              | °C           | Strong     |
+| `0xA3` |      2 | `i16 LE`       | BMS MOSFET temperature                   | °C           | Strong     |
+
+### `0x64` BMS firmware version width and payload length
+
+On a JPLS-8H, firmware V133, no expansion batteries, `0x64` is a constant
+single byte across every capture, including a 20-request repeatability burst
+sent over one held connection roughly 3 s apart. Reading it as the previously
+documented 2-byte field produced a value that changed between captures even
+though a firmware version should not change within one polling session; the
+second, changing byte belongs to the following battery-voltage field. With
+`0x64` at 1 byte, every field from the old `0x65` onward decodes to
+independently plausible values on this device: battery voltage/current/
+temperature match values already corroborated from other offsets and an
+external field map, stored battery energy tracks the same device's
+cloud-reported reading within the polling time offset, populated
+battery-pack count reads `1` (matching a base-only unit with no expansion
+batteries), and the previously unexamined per-cell voltages in the repeated
+battery-pack records read as plausible individual cell voltages.
 
 Offset `0x08` was previously interpreted as grid current. Controlled Jupiter
 observations showed that it remained zero while the device had non-zero grid

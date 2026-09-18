@@ -4,8 +4,8 @@ title: Jupiter-C Plus 0x14 detailed telemetry
 description: Inverter, grid, MPPT, PV-input, battery, and repeated battery-pack response layout.
 tags: [jupiter, ble, telemetry, inverter, mppt, bms]
 status: draft
-source_revision: "03cd0abb9d3a3ac6421037a2f439a6aa9927cdb8"
-generated: { by: openai/gpt-5.6-sol, at: 2026-09-14T16:30:00Z }
+source_revision: "8b290a3"
+generated: { by: anthropic/claude-sonnet-5, at: 2026-09-18T00:00:00Z }
 sources:
   - id: sanitized-map
     resource: https://github.com/The-M1k3y/ha-marstek-ble/blob/03cd0abb9d3a3ac6421037a2f439a6aa9927cdb8/docs/sources/jupiter-c-plus-ble-field-map.md
@@ -17,10 +17,22 @@ sources:
 
 # Response
 
-Payload length: 166 bytes. Offsets are relative to the payload. The complete,
+Payload length: **165 bytes**, confirmed on a JPLS-8H, firmware V133, no
+expansion batteries. Offsets are relative to the payload. The complete,
 offset-ordered structural table is maintained in the [sanitized source
 map](../../../../sources/jupiter-c-plus-ble-field-map.md). This concept groups
 that structure by contiguous byte range without changing field order.
+
+A previous version of this map declared an unconditional 166-byte payload
+with `0x64` BMS firmware version as 2 bytes. On the device this correction is
+based on, `0x64` is a constant single byte across every capture, and the
+byte the old 2-byte read borrowed from the following field varied between
+captures — not plausible for a firmware version. Narrowing that field by 1
+byte shifts every subsequent offset (below, and in the sanitized source map)
+by −1 relative to the previous version of this table and makes the full
+165-byte payload parse exactly, with no bytes left over. Whether other
+Jupiter-C Plus hardware/firmware combinations genuinely use a 166-byte
+layout with a real 2-byte firmware version is unresolved.
 
 | Range       | Structure                                                                      |
 | ----------- | ------------------------------------------------------------------------------ |
@@ -29,9 +41,9 @@ that structure by contiguous byte range without changing field order.
 | `0x28–0x3F` | Four PV inputs, each voltage/current/power                                     |
 | `0x40–0x4F` | PV generation counters and one unknown range                                  |
 | `0x50–0x57` | MPPT DC output plus tentative base/PE voltages                                 |
-| `0x58–0x79` | Battery limits, state, capacity, electrical values, diagnostics, pack count, and stored energy |
-| `0x7A–0x99` | Four repeated 8-byte battery-pack summaries                                   |
-| `0x9A–0xA5` | Battery, environment, and MOSFET temperatures                                 |
+| `0x58–0x78` | Battery limits, state, capacity, electrical values, diagnostics, pack count, and stored energy |
+| `0x79–0x98` | Four repeated 8-byte battery-pack summaries                                   |
+| `0x99–0xA4` | Battery, environment, and MOSFET temperatures                                 |
 
 # Inverter state and grid qualification
 
@@ -132,7 +144,7 @@ contain:
 
 # Battery-pack records
 
-The four 8-byte records start at `0x7A`. Record 0 represents the base battery;
+The four 8-byte records start at `0x79`. Record 0 represents the base battery;
 records 1–3 represent expansion positions. The populated-record count at `0x76`
 controls record presence and child-device/entity creation. Newly reported
 positions can be added by the live entity manager without renumbering existing
