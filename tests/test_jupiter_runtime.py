@@ -76,7 +76,9 @@ def test_jupiter_runtime_summary_parses_pv_power_and_system_values() -> None:
     assert data.runtime.ac_output_active is True
     assert data.inverter.error_code == 0x0426
     assert data.runtime.battery_charging_active is True
-    assert data.runtime.stored_battery_energy == 2500.0
+    # 0x03 carries stored energy at 10 Wh resolution but must not write it;
+    # the whole-watt-hour field in 0x14 is the only source for this value.
+    assert data.runtime.stored_battery_energy is None
     assert data.runtime.battery_soc == 73.0
     assert data.energy.daily_pv_generation == pytest.approx(12.34)
     assert data.energy.monthly_pv_generation == pytest.approx(56.78)
@@ -118,7 +120,9 @@ def test_jupiter_runtime_packet_parses_shorter_field_hardware_variant() -> None:
     assert paths is not None
     assert data.runtime.ac_output_power == 640.0
     assert data.runtime.battery_charging_active is True
-    assert data.runtime.stored_battery_energy == 2500.0
+    # 0x03 carries stored energy at 10 Wh resolution but must not write it;
+    # the whole-watt-hour field in 0x14 is the only source for this value.
+    assert data.runtime.stored_battery_energy is None
     assert data.runtime.battery_soc == 73.0
     assert data.runtime.operational_status == 5
 

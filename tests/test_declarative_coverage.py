@@ -488,7 +488,9 @@ def test_jupiter_runtime_packet_parses_summary_and_four_pv_inputs() -> None:
     assert data.runtime.ac_output_power == 750.0
     assert data.runtime.ac_output_active is True
     assert data.runtime.battery_charging_active is True
-    assert data.runtime.stored_battery_energy == 1230.0
+    # 0x03 carries stored energy at 10 Wh resolution but must not write it;
+    # the whole-watt-hour field in 0x14 is the only source for this value.
+    assert data.runtime.stored_battery_energy is None
     assert data.runtime.battery_soc == 87.0
     assert data.runtime.operational_status == 5
     assert (
