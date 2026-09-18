@@ -15,7 +15,7 @@ from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfElectri
 from homeassistant.helpers.entity import EntityCategory
 
 from ..entity import ProductDeviceSpec, ProductProfile, RepeatedChildDeviceSpec, binary_sensor_entity, derived_sensor, sensor_entity
-from ..schema import FieldSource, PacketSchema, RepeatedSectionSource, bit, divide_by, multiply_by, nonzero, repeated_section_field, section_field, source_field, value_field
+from ..schema import FieldSource, PacketSchema, RepeatedSectionSource, bit, divide_by, nonzero, repeated_section_field, section_field, source_field, value_field
 
 _DIAGNOSTIC = EntityCategory.DIAGNOSTIC
 _BATTERY_STATES = {0: "idle", 1: "charging", 2: "discharging"}
@@ -91,7 +91,7 @@ class JupiterRuntimeData:
     # Temporary data-model compatibility for callers using the old field name.
     ac_output_active: bool | None = source_field(sources={_RUNTIME: FieldSource(0x0E, "<B", nonzero)})
     battery_state: str | None = source_field(sources={_RUNTIME: FieldSource(0x12, "<B", _battery_state)}, entities=_sensor("battery_state", "Battery State"))
-    stored_battery_energy: float | None = source_field(sources={_RUNTIME: FieldSource(0x13, "<H", multiply_by(10)), _DETAIL: FieldSource(0x77, "<H", float)}, entities=_sensor("stored_battery_energy", "Stored Battery Energy", native_unit_of_measurement=UnitOfEnergy.WATT_HOUR, device_class=SensorDeviceClass.ENERGY_STORAGE, state_class=SensorStateClass.MEASUREMENT))
+    stored_battery_energy: float | None = source_field(sources={_DETAIL: FieldSource(0x77, "<H", float)}, entities=_sensor("stored_battery_energy", "Stored Battery Energy", native_unit_of_measurement=UnitOfEnergy.WATT_HOUR, device_class=SensorDeviceClass.ENERGY_STORAGE, state_class=SensorStateClass.MEASUREMENT))
     battery_soc: float | None = source_field(sources={_RUNTIME: FieldSource(0x15, "<B", float), _DETAIL: FieldSource(0x5E, "<H", float)}, entities=_sensor("battery_soc", "Battery SOC", native_unit_of_measurement=PERCENTAGE, device_class=SensorDeviceClass.BATTERY, state_class=SensorStateClass.MEASUREMENT))
     operational_status: int | None = source_field(sources={_RUNTIME: FieldSource(0x3C, "<B")}, entities=_sensor("operational_status", "Operational Status", entity_category=_DIAGNOSTIC))
     surplus_feed_in_active: bool | None = source_field(sources={_RUNTIME: FieldSource(0x3C, "<B", bit(1))}, entities=_binary("surplus_feed_in_active", "Surplus Feed-In Active Unverified"))
