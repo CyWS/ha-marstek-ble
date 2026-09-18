@@ -106,6 +106,14 @@ behaviour, `0x040A` is tentatively associated with **overfrequency** and `0x0426
 with **island / anti-islanding detection**. Those semantic names remain
 Tentative; the numeric field mapping is Confirmed.
 
+### `0x03` stored battery energy is decoded but not used
+
+Offset `0x13` is a raw count of 10 Wh units and decodes correctly, but `0x14`
+offset `0x77` reports the same quantity in whole watt-hours. Both commands are
+polled once per second, so consuming both for one value makes it alternate
+between the two resolutions on every poll. Implementations should prefer the
+`0x14` field and treat this one as redundant.
+
 ### `0x03` payload length varies by hardware/firmware
 
 On at least one confirmed unit, `0x03` responses are consistently 67 bytes,

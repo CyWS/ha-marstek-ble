@@ -95,10 +95,19 @@ The battery-state mapping is supported by controlled observations of idle,
 charging, and forced discharge. Unrecognized raw values are exposed as
 `unknown` rather than treated as charging.
 
-The stored-energy, state-of-charge, generation, output-energy, firmware, and
-inverter-error fields share canonical destinations with more precise or duplicate
-fields in `0x14`. The latest successfully parsed packet updates the cumulative
-value.
+The state-of-charge, generation, output-energy, firmware, and inverter-error
+fields share canonical destinations with duplicate fields in `0x14`. The latest
+successfully parsed packet updates the cumulative value; for those fields both
+packets carry the same value at the same resolution, so arrival order does not
+matter.
+
+Stored battery energy is the exception and is no longer written from here. The
+field at `0x13` is a raw count of 10 Wh units, while `0x14` offset `0x77` reports
+the same quantity in whole watt-hours. With both commands in the one-second fast
+poll and no source precedence in the field model, the two representations
+alternated on every poll. The mapping below stays documented because the field is
+real and correctly decoded, but only the higher-resolution `0x14` source writes
+the canonical value.
 
 # Payload length varies by hardware/firmware
 
